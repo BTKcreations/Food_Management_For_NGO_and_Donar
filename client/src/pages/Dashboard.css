@@ -1,0 +1,125 @@
+/* ========== DASHBOARD LAYOUT ========== */
+.dashboard-page {
+  padding: calc(var(--navbar-height) + 1.5rem) 1.5rem 2rem calc(var(--sidebar-width) + 1.5rem);
+  min-height: 100vh;
+  transition: padding-left var(--transition-normal);
+}
+
+.sidebar.collapsed ~ .dashboard-page,
+.sidebar.collapsed ~ * .dashboard-page {
+  padding-left: calc(var(--sidebar-collapsed) + 1.5rem);
+}
+
+/* Welcome */
+.dash-welcome {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  padding: 1.5rem 2rem;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(99, 102, 241, 0.05));
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  border-radius: var(--radius-lg);
+}
+
+.dash-greeting {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.dash-greeting-sub {
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+  margin-top: 4px;
+}
+
+/* Stats Grid */
+.dash-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+/* Section */
+.dash-section {
+  margin-bottom: 2rem;
+}
+
+.dash-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.dash-section-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+/* Quick Actions */
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.quick-action-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.quick-action-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 12px 40px rgba(16, 185, 129, 0.2);
+}
+
+.quick-action-icon {
+  font-size: 2rem;
+}
+
+.quick-action-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* Donations Grid */
+.donations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1rem;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+  .dashboard-page {
+    padding: calc(var(--navbar-height) + 1rem) 1rem 2rem 1rem;
+  }
+
+  .dash-welcome {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .dash-greeting {
+    font-size: 1.25rem;
+  }
+
+  .dash-stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .donations-grid {
+    grid-template-columns: 1fr;
+  }
+}
