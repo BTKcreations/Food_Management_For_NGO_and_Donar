@@ -1,82 +1,118 @@
-# FoodBridge 🌿
+# FoodBridge 🌿 | Social Enterprise Logistics & Sustainability System
 
-## Food Waste & Hunger Management System
+**A powerful, real-time logistics engine connecting surplus food generators with those in need.**
 
-A centralized digital platform that connects food surplus generators (restaurants, hotels, event venues, households) with NGOs, volunteers, and communities in need — enabling real-time redistribution of surplus edible food.
+FoodBridge is more than a management tool — it's a "Social Enterprise" ecosystem. It transforms surplus food from hotels, restaurants, and event venues into survival resources for NGOs and local communities using an intelligent, role-based logistics network.
 
 ---
 
-## 🛠️ Tech Stack
+## 🚀 The Impact Engine (Key Features)
 
-| Component | Technology |
-|-----------|-----------|
-| Frontend | React.js (Vite) |
-| Backend | Node.js + Express.js |
-| Database | MongoDB (Mongoose) |
-| Auth | JWT + bcrypt |
-| Maps | Leaflet.js + OpenStreetMap |
-| Styling | Vanilla CSS (Dark Theme) |
+### 📊 Sustainability Analytics (CSR Dashboard)
+Every action on FoodBridge contributes to a greener planet. Our **Mission Control Dashboard** calculates real-time Corporate Social Responsibility (CSR) metrics:
+- **CO2 Offset**: Automatically calculates environmental impact based on food weight salvaged.
+- **Meals Provided**: Real-time counter of community impact.
+- **Volunteer Karma**: A gamified reputation system rewarding volunteers for successful deliveries.
 
-## 🚀 Getting Started
+### ☀️ Universal Theme Engine 2.0
+A premium user experience with multi-mode transition support:
+- **Dark Mode**: Optimized for low-light "Mission Control" monitoring.
+- **Light Mode**: High-contrast, professional "Social Enterprise" aesthetic.
+- **System Sync**: Automatically adapts to your OS settings for a seamless feel.
 
-### Prerequisites
-- Node.js 18+ installed
-- MongoDB running locally (or MongoDB Atlas connection string)
+### ⚡ Intelligence Expiry Engine (Urgency Tracking)
+Donations aren't just listed — they are prioritized.
+- **Flash-Discovery**: Items expiring in <3 hours pulse red with an **URGENT** warning.
+- **Smart Sorting**: The system prioritizes the most critical food items to ensure zero-waste.
 
-### Setup
+### 📍 Precision Logistics & Tracking
+- **Interactive Mapbox Integration**: Real-time location picking and delivery tracking.
+- **Secure Handoff**: Verified organization badges and organization verification systems.
 
-1. **Clone & Install**
+---
+
+## 🔄 The Lifecycle Workflow (Donation Journey)
+
+```mermaid
+graph TD
+    A[Donor: Posts Surplus Food] --> B{Urgency Check}
+    B -->|Critical <3hr| C[🔥 High Priority Alert]
+    B -->|Stable| D[Standard Listing]
+    C --> E[NGO Browse & Claim]
+    D --> E
+    E --> F[Volunteer: Delivery Market]
+    F --> G[Volunteer: Accept & Navigate]
+    G --> H[Pick-up & Verification]
+    H --> I[Safe Delivery & Validation]
+    I --> J[Impact Logged: CO2 Offset + Meals + Karma]
+```
+
+---
+
+## 👤 Role-Based Mission Control
+
+| Role | Mission | Primary Dashboard |
+| :--- | :--- | :--- |
+| **Donor** | Community Contribution | **My Recent Impact**: Impact metrics & Donation History. |
+| **NGO** | Community Support | **Claim Hub**: Active Claims, Expiring Food Radar. |
+| **Volunteer** | Logistics Champion | **Mission Hub**: Active Deliveries, Karma Points, Delivery Market. |
+| **Admin** | Platform Optimizer | **Control Center**: User Verification, Global Analytics. |
+
+---
+
+## 🛠️ Technical Architecture
+
+### Core Tech Stack
+- **Frontend**: React.js (Vite) + Context API for Global Theme/Auth logic.
+- **Backend**: Node.js + Express.js + Mongoose (MongoDB).
+- **Interactive**: Mapbox GL JS for logistics and real-time tracking.
+- **Performance**: Zero-Layout-Shift design with Shimmer-based **Skeleton Loading**.
+
+### Key Infrastructure
+- **Real-time Notifications**: Custom event-driven notification engine.
+- **Reputation System**: Model-level karma incrementation for verified actions.
+- **Design Tokens**: Centralized CSS variables for "Theme 2.0" support.
+
+---
+
+## 🏁 Getting Started (Developer Setup)
+
+### 1. Prerequisites
+- **Node.js**: 18+
+- **MongoDB**: Local instance or Atlas URI
+- **Mapbox API Token**: For interactive maps
+
+### 2. Installations
 ```bash
-# Install server dependencies
-cd server
-npm install
+# Clone the FoodBridge ecosystem
+git clone <repository-url>
 
-# Install client dependencies
-cd ../client
-npm install
+# Setup Server
+cd server && npm install
+
+# Setup Client
+cd ../client && npm install
 ```
 
-2. **Configure Environment**
-Edit `server/.env`:
-```
+### 3. Environment Configuration (`.env`)
+Create a `.env` in the `/server` directory:
+```env
 PORT=5000
-MONGODB_URI=mongodb://localhost:27017/food_management
-JWT_SECRET=your_secret_key
-JWT_EXPIRE=7d
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_secure_secret_key
+MAPBOX_ACCESS_TOKEN=your_mapbox_token
 ```
 
-3. **Start the Application**
+### 4. Launching the Platform
 ```bash
-# Terminal 1: Start backend
-cd server
-node server.js
+# Terminal 1: Mission Control (Backend)
+cd server && node server.js
 
-# Terminal 2: Start frontend
-cd client
-npm run dev
+# Terminal 2: Strategic UI (Frontend)
+cd client && npm run dev
 ```
 
-4. **Open** http://localhost:5173
+---
 
-## 👥 User Roles
-
-| Role | Capabilities |
-|------|-------------|
-| **Donor** | Post surplus food, track donations |
-| **NGO** | Browse & claim food, submit requests |
-| **Volunteer** | Handle pickups & deliveries |
-| **Admin** | Platform management, analytics |
-
-## 📦 API Endpoints
-
-- `POST /api/auth/register` - Register
-- `POST /api/auth/login` - Login
-- `GET /api/donations` - List donations
-- `POST /api/donations` - Create donation
-- `PUT /api/donations/:id/claim` - Claim donation
-- `GET /api/analytics` - Platform analytics
-- `GET /api/notifications` - User notifications
-
-## 📄 License
-
-This project is built for academic purposes — Major Project 2026.
+## 📄 Platform Credits
+*Built with ❤️ for the 2026 Academic Major Program — Towards a Zero-Waste Future.*
