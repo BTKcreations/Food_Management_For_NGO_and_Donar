@@ -95,6 +95,19 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/users', userRoutes);
 
+// Root route for server identification
+app.get('/', (req, res) => {
+  res.send(`
+    <body style="font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #f4f7f6;">
+      <div style="text-align: center; padding: 2rem; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <h1 style="color: #10b981; margin-bottom: 0.5rem;">🚚 FoodBridge API is LIVE</h1>
+        <p style="color: #64748b;">The backend server is running correctly.</p>
+        <a href="/api/health" style="color: #3b82f6; text-decoration: none; font-weight: 600;">Check API Health →</a>
+      </div>
+    </body>
+  `);
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({
