@@ -23,9 +23,24 @@ export default function CreateDonation() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    if (type === 'file') {
+      const files = Array.from(e.target.files);
+      setFormData(prev => ({
+        ...prev,
+        images: [...(prev.images || []), ...files]
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value
+      }));
+    }
+  };
+
+  const removeImage = (index) => {
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : type === 'file' ? e.target.files : value
+      images: prev.images.filter((_, i) => i !== index)
     }));
   };
 
@@ -151,18 +166,32 @@ export default function CreateDonation() {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Food Photos (Max 3)</label>
-            <input 
-              type="file" 
-              name="images" 
-              multiple 
-              accept="image/*" 
-              onChange={handleChange} 
-              className="form-input" 
-              style={{ padding: '0.4rem' }}
-            />
-            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-              Upload real photos of the food to help NGOs and Volunteers verify the condition.
+            <label className="form-label">Food Photos</label>
+            <div className="media-manager">
+              {formData.images.length > 0 && (
+                <div className="image-preview-grid">
+                  {Array.from(formData.images).map((file, i) => (
+                    <div key={i} className="preview-item">
+                      <img src={URL.createObjectURL(file)} alt="Preview" />
+                      <button type="button" className="preview-remove" onClick={() => removeImage(i)}>×</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              <div className="media-actions">
+                <label className="media-btn">
+                  <span>📸 Capture Photo</span>
+                  <input type="file" accept="image/*" capture="environment" onChange={handleChange} />
+                </label>
+                <label className="media-btn">
+                  <span>➕ Add Files</span>
+                  <input type="file" accept="image/*" multiple onChange={handleChange} />
+                </label>
+              </div>
+            </div>
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '8px' }}>
+              Upload real photos to help with verification. You can add more photos one by one.
             </p>
           </div>
 

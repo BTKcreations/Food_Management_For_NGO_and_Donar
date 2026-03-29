@@ -155,6 +155,10 @@ export default function DonationDetails() {
     }
   };
 
+  const removeDeliveryImage = (index) => {
+    setDeliveryImages(prev => prev.filter((_, i) => i !== index));
+  };
+
   const foodTypeIcons = {
     cooked: '🍛', raw: '🥬', packaged: '📦', beverages: '🥤',
     bakery: '🍞', fruits_vegetables: '🍎', other: '🍽️'
@@ -351,16 +355,42 @@ export default function DonationDetails() {
 
                 {transaction.status === 'in_transit' && (
                   <div style={{ marginBottom: '1.5rem' }}>
-                    <label className="form-label">📸 Add Proof of Distribution (Volunteer)</label>
-                    <input 
-                      type="file" 
-                      multiple 
-                      accept="image/*" 
-                      className="form-input" 
-                      onChange={(e) => setDeliveryImages(Array.from(e.target.files))}
-                    />
-                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                      Please upload a photo of the food being received by the NGO.
+                    <label className="form-label">📸 Add Proof of Distribution</label>
+                    <div className="media-manager">
+                      {deliveryImages.length > 0 && (
+                        <div className="image-preview-grid">
+                          {deliveryImages.map((file, i) => (
+                            <div key={i} className="preview-item">
+                              <img src={URL.createObjectURL(file)} alt="Preview" />
+                              <button type="button" className="preview-remove" onClick={() => removeDeliveryImage(i)}>×</button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      
+                      <div className="media-actions">
+                        <label className="media-btn">
+                          <span>📸 Capture Proof</span>
+                          <input 
+                            type="file" 
+                            accept="image/*" 
+                            capture="environment" 
+                            onChange={(e) => setDeliveryImages(prev => [...prev, ...Array.from(e.target.files)])} 
+                          />
+                        </label>
+                        <label className="media-btn">
+                          <span>➕ Add More</span>
+                          <input 
+                            type="file" 
+                            accept="image/*" 
+                            multiple 
+                            onChange={(e) => setDeliveryImages(prev => [...prev, ...Array.from(e.target.files)])} 
+                          />
+                        </label>
+                      </div>
+                    </div>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '8px' }}>
+                      Please provide clear photos of the food being received.
                     </p>
                   </div>
                 )}
