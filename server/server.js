@@ -6,7 +6,6 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const compression = require('compression');
 const morgan = require('morgan');
-const mongoSanitize = require('express-mongo-sanitize');
 const hpp = require('hpp');
 
 const connectDB = require('./config/db');
@@ -23,7 +22,10 @@ const userRoutes = require('./routes/users');
 const app = express();
 
 // 🛡️ 1. Security Headers (Helmet)
-app.use(helmet());
+// Allowed crossOriginResourcePolicy as cross-origin to allow serving images locally
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 
 // 🧪 2. Traffic Logging (Morgan)
 if (process.env.NODE_ENV === 'development') {
@@ -33,7 +35,7 @@ if (process.env.NODE_ENV === 'development') {
 // 🚦 3. Rate Limiting (Prevent DDoS/Brute Force)
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per window
+  max: 1000, // Increased for development/testing
   message: {
     success: false,
     message: 'Too many requests from this IP, please try again after 15 minutes'
@@ -44,20 +46,42 @@ app.use('/api', limiter);
 // 🚀 4. Performance (Compression)
 app.use(compression());
 
-// 🧹 5. Data Sanitization (NoSQL Injection & XSS)
-app.use(mongoSanitize());
-app.use(hpp()); // Prevent HTTP Parameter Pollution
-
-// Connect to MongoDB
-connectDB();
-
 // Middleware
 app.use(cors({
   origin: ['http://localhost:5173', 'http://localhost:3000'],
   credentials: true
 }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// 🧹 5. Data Sanitization (NoSQL Injection & XSS)
+// This MUST come after express.json() and express.urlencoded()
+// Custom sanitization for Express 5 compatibility (avoids overwriting req.query)
+const sanitizeObject = (obj) => {
+  if (obj instanceof Object) {
+    for (const key in obj) {
+      if (/^\$/.test(key)) {
+        delete obj[key];
+      } else {
+        sanitizeObject(obj[key]);
+      }
+    }
+  }
+  return obj;
+};
+
+app.use((req, res, next) => {
+  if (req.body) sanitizeObject(req.body);
+  if (req.params) sanitizeObject(req.params);
+  if (req.query) sanitizeObject(req.query);
+  next();
+});
+
+app.use(hpp()); // Prevent HTTP Parameter Pollution
+
+// Connect to MongoDB
+connectDB();
 
 // Serve uploaded files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -73,8 +97,8 @@ app.use('/api/users', userRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
+  res.json({
+    status: 'ok',
     message: 'FoodBridge API is running',
     timestamp: new Date().toISOString()
   });
@@ -82,7 +106,8 @@ app.get('/api/health', (req, res) => {
 
 // Global Error Handler
 app.use((err, req, res, next) => {
-  console.error('SERVER ERROR 🔥:', err);
+  console.error('SERVER ERROR 🔥:', err.message || err);
+  if (err.stack) console.error('ERROR STACK 📜:', err.stack);
   
   const statusCode = err.statusCode || 500;
   res.status(statusCode).json({

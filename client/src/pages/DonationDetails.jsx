@@ -29,12 +29,19 @@ export default function DonationDetails() {
       
       // If claimed, try to find the associated transaction to get codes/details
       if (res.data.donation.status !== 'available') {
-        const transRes = await api.get('/transactions');
-        const relatedTrans = transRes.data.transactions.find(t => t.donation?._id === id);
-        if (relatedTrans) {
-          // Fetch full transaction details (including codes if authorized)
-          const fullTransRes = await api.get(`/transactions/${relatedTrans._id}`);
-          setTransaction(fullTransRes.data.transaction);
+        try {
+          const transRes = await api.get('/transactions');
+          const relatedTrans = transRes.data.transactions.find(t => t.donation?._id === id);
+          if (relatedTrans) {
+            // Fetch full transaction details (including codes if authorized)
+            const fullTransRes = await api.get(`/transactions/${relatedTrans._id}`);
+            setTransaction(fullTransRes.data.transaction);
+          }
+        } catch (transErr) {
+          // 403 is expected if the current user isn't part of this transaction
+          if (transErr.response?.status !== 403) {
+            console.error('Transaction fetch error:', transErr);
+          }
         }
       }
     } catch (err) {
