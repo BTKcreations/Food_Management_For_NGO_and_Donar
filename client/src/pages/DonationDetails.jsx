@@ -226,6 +226,15 @@ export default function DonationDetails() {
                   />
                   <p style={{ fontSize: '0.8125rem', fontWeight: 700, marginTop: '8px', marginBottom: '4px' }}>{item.name}</p>
                   
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
+                    {item.quantityOrWeight && (
+                      <span className="badge badge-secondary" style={{ fontSize: '0.6rem', padding: '2px 6px' }}>⚖️ {item.quantityOrWeight}</span>
+                    )}
+                    {item.servings > 0 && (
+                      <span className="badge badge-primary" style={{ fontSize: '0.6rem', padding: '2px 6px' }}>👥 {item.servings} Servs</span>
+                    )}
+                  </div>
+
                   {item.preparedAt && (
                     <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
                       🍳 Prep: {new Date(item.preparedAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}

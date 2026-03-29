@@ -11,15 +11,18 @@ exports.createDonation = async (req, res) => {
       foodType, foodName, description, quantity, servings,
       preparedAt, expiresAt, address, contactPhone,
       latitude, longitude, isVegetarian, allergens, specialInstructions,
-      safetyCertified, urgency, itemNames, itemPreparedDates, itemExpiresDates
+      safetyCertified, urgency, itemNames, itemPreparedDates, itemExpiresDates,
+      itemQuantities, itemServings
     } = req.body;
 
-    // Handle items (name + image + dates mapping)
+    // Handle items (name + image + dates + quant/serv mapping)
     const items = [];
     if (itemNames && req.files) {
       const names = Array.isArray(itemNames) ? itemNames : [itemNames];
       const prepDates = Array.isArray(itemPreparedDates) ? itemPreparedDates : [itemPreparedDates];
       const expiryDates = Array.isArray(itemExpiresDates) ? itemExpiresDates : [itemExpiresDates];
+      const quantities = Array.isArray(itemQuantities) ? itemQuantities : [itemQuantities];
+      const itemservings = Array.isArray(itemServings) ? itemServings : [itemServings];
       
       names.forEach((name, index) => {
         if (req.files[index]) {
@@ -27,7 +30,9 @@ exports.createDonation = async (req, res) => {
             name,
             image: req.files[index].path,
             preparedAt: prepDates[index] || null,
-            expiresAt: expiryDates[index] || null
+            expiresAt: expiryDates[index] || null,
+            quantityOrWeight: quantities[index] || '',
+            servings: parseInt(itemservings[index]) || 0
           });
         }
       });

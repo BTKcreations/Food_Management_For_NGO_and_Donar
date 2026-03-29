@@ -54,6 +54,8 @@ const donationSchema = new mongoose.Schema({
   items: [{
     name: { type: String, required: true },
     image: { type: String, required: true },
+    quantityOrWeight: { type: String },
+    servings: { type: Number },
     preparedAt: { type: Date },
     expiresAt: { type: Date }
   }],

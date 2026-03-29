@@ -14,11 +14,12 @@ export default function CreateDonation() {
     servings: '', preparedAt: '', expiresAt: '', address: user?.address || '',
     contactPhone: user?.phone || '', isVegetarian: false,
     latitude: 0, longitude: 0, specialInstructions: '',
-    latitude: 0, longitude: 0, specialInstructions: '',
     safetyCertified: false, urgency: 'medium'
   });
   const [basket, setBasket] = useState([]);
   const [currentItemName, setCurrentItemName] = useState('');
+  const [itemQuantity, setItemQuantity] = useState('');
+  const [itemServings, setItemServings] = useState(0);
   const [itemPrepAt, setItemPrepAt] = useState('');
   const [itemExpAt, setItemExpAt] = useState('');
   const [currentFile, setCurrentFile] = useState(null);
@@ -29,24 +30,9 @@ export default function CreateDonation() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    if (type === 'file') {
-      const files = Array.from(e.target.files);
-      setFormData(prev => ({
-        ...prev,
-        images: [...(prev.images || []), ...files]
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: type === 'checkbox' ? checked : value
-      }));
-    }
-  };
-
-  const removeImage = (index) => {
     setFormData(prev => ({
       ...prev,
-      images: prev.images.filter((_, i) => i !== index)
+      [name]: type === 'checkbox' ? checked : value
     }));
   };
 
@@ -55,10 +41,14 @@ export default function CreateDonation() {
     setBasket(prev => [...prev, { 
       name: currentItemName, 
       file: currentFile,
+      quantityOrWeight: itemQuantity,
+      servings: itemServings,
       preparedAt: itemPrepAt,
       expiresAt: itemExpAt
     }]);
     setCurrentItemName('');
+    setItemQuantity('');
+    setItemServings(0);
     setItemPrepAt('');
     setItemExpAt('');
     setCurrentFile(null);
@@ -80,11 +70,13 @@ export default function CreateDonation() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     setError('');
     setSuccess('');
 
     if (!formData.latitude || !formData.longitude || (formData.latitude === 0 && formData.longitude === 0)) {
       setError('Please set your pickup location using the map below');
+      setLoading(false);
       return;
     }
 
@@ -97,21 +89,20 @@ export default function CreateDonation() {
     try {
       const data = new FormData();
       
-      // Auto-generate collective food name if not provided or just use items
       const collectiveName = basket.map(item => item.name).join(' + ');
       
       Object.keys(formData).forEach(key => {
         data.append(key, formData[key]);
       });
 
-      // Override foodName with collective name if items exist
       data.set('foodName', collectiveName);
 
-      // Append items
       basket.forEach((item, index) => {
         data.append('itemNames', item.name);
         data.append('itemPreparedDates', item.preparedAt);
         data.append('itemExpiresDates', item.expiresAt);
+        data.append('itemQuantities', item.quantityOrWeight);
+        data.append('itemServings', item.servings);
         data.append('images', item.file);
       });
 
@@ -139,13 +130,127 @@ export default function CreateDonation() {
         {success && <div className="alert alert-success">{success}</div>}
 
         <form onSubmit={handleSubmit}>
+          {/* 🍲 FOOD BASKET SECTION (FIRST PLACE) */}
+          <div className="form-group" style={{ marginBottom: '2.5rem', paddingBottom: '2.5rem', borderBottom: '1px solid var(--border-light)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <label className="form-label" style={{ fontSize: '1.125rem', color: 'var(--primary)', marginBottom: 0 }}>🍲 Your Food Basket *</label>
+              <span className="badge badge-primary">{basket.length} items added</span>
+            </div>
+
+            <div className="media-manager">
+              {basket.length > 0 && (
+                <div className="image-preview-grid" style={{ marginBottom: '1.5rem' }}>
+                  {basket.map((item, i) => (
+                    <div key={i} className="preview-item" style={{ height: 'auto', width: '150px', borderStyle: 'solid' }}>
+                      <img src={URL.createObjectURL(item.file)} alt="Preview" style={{ height: '110px' }} />
+                      <div style={{ padding: '10px', background: 'var(--bg-secondary)', borderTop: '1px solid var(--border-light)' }}>
+                        <p style={{ fontSize: '0.8125rem', fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: '2px' }}>{item.name}</p>
+                        <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{item.quantityOrWeight || 'No qty'}</p>
+                      </div>
+                      <button type="button" className="preview-remove" onClick={() => removeFromBasket(i)}>×</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {!showItemForm ? (
+                <button 
+                  type="button" 
+                  className="btn btn-primary" 
+                  style={{ width: '100%', padding: '1.25rem', fontSize: '1rem', border: '2px dashed var(--primary)', background: 'rgba(16, 185, 129, 0.05)', color: 'var(--primary)' }}
+                  onClick={() => setShowItemForm(true)}
+                >
+                  ➕ Click to Add Food Item
+                </button>
+              ) : (
+                <div className="glass-card" style={{ padding: '1.5rem', border: '2px solid var(--primary-light)', animation: 'slideDown 0.3s ease', background: 'var(--bg-secondary)' }}>
+                  <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+                    
+                    {/* Step 1: Image & Preview */}
+                    <div style={{ flex: '1 1 250px' }}>
+                      <h4 style={{ fontSize: '0.875rem', marginBottom: '1rem', color: 'var(--text-muted)' }}>STEP 1: CAPTURE PHOTO</h4>
+                      {currentFile ? (
+                        <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '2px solid var(--primary)', marginBottom: '1rem' }}>
+                          <img src={URL.createObjectURL(currentFile)} alt="Captured" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          <button type="button" className="preview-remove" style={{ top: '8px', right: '8px' }} onClick={() => setCurrentFile(null)}>×</button>
+                        </div>
+                      ) : (
+                        <div className="media-actions" style={{ flexDirection: 'column', gap: '0.75rem' }}>
+                          <label className="media-btn" style={{ padding: '2rem', borderStyle: 'dashed', background: 'var(--bg-tertiary)' }}>
+                            <span style={{ fontSize: '1.5rem' }}>📸</span>
+                            <span>Take Live Photo</span>
+                            <input type="file" accept="image/*" capture="environment" onChange={(e) => setCurrentFile(e.target.files[0])} />
+                          </label>
+                          <label className="media-btn">
+                            <span>📁 Upload from Gallery</span>
+                            <input type="file" accept="image/*" onChange={(e) => setCurrentFile(e.target.files[0])} />
+                          </label>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Step 2: Item Details */}
+                    {currentFile && (
+                      <div style={{ flex: '1 1 300px' }} className="animate-fade-in">
+                        <h4 style={{ fontSize: '0.875rem', marginBottom: '1rem', color: 'var(--text-muted)' }}>STEP 2: ITEM DETAILS</h4>
+                        
+                        <div className="form-group" style={{ marginBottom: '1rem' }}>
+                          <label className="form-label" style={{ fontSize: '0.75rem' }}>What is this food? *</label>
+                          <input 
+                            type="text" 
+                            className="form-input" 
+                            placeholder="e.g. Tomato Soup, Veg Biryani..." 
+                            value={currentItemName} 
+                            onChange={(e) => setCurrentItemName(e.target.value)} 
+                            autoFocus
+                          />
+                        </div>
+
+                        <div className="form-row" style={{ gap: '0.75rem', marginBottom: '1rem' }}>
+                          <div className="form-group" style={{ marginBottom: 0 }}>
+                            <label className="form-label" style={{ fontSize: '0.75rem' }}>Qty / Weight</label>
+                            <input type="text" className="form-input" placeholder="e.g. 2 kg, 1 box" value={itemQuantity} onChange={e => setItemQuantity(e.target.value)} />
+                          </div>
+                          <div className="form-group" style={{ marginBottom: 0 }}>
+                            <label className="form-label" style={{ fontSize: '0.75rem' }}>Servings</label>
+                            <input type="number" className="form-input" placeholder="0" value={itemServings} onChange={e => setItemServings(e.target.value)} />
+                          </div>
+                        </div>
+
+                        <div className="form-row" style={{ gap: '0.75rem', marginBottom: '1.5rem' }}>
+                          <div className="form-group" style={{ marginBottom: 0 }}>
+                            <label className="form-label" style={{ fontSize: '0.75rem' }}>Prep Time</label>
+                            <input type="datetime-local" className="form-input" value={itemPrepAt} onChange={e => setItemPrepAt(e.target.value)} />
+                          </div>
+                          <div className="form-group" style={{ marginBottom: 0 }}>
+                            <label className="form-label" style={{ fontSize: '0.75rem' }}>Expiry Time</label>
+                            <input type="datetime-local" className="form-input" value={itemExpAt} onChange={e => setItemExpAt(e.target.value)} />
+                          </div>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '0.75rem' }}>
+                          <button type="button" className="btn btn-primary" style={{ flex: 1 }} onClick={addToBasket}>
+                            ✅ Add to My Basket
+                          </button>
+                          <button type="button" className="btn btn-ghost" onClick={() => { setShowItemForm(false); setCurrentFile(null); setCurrentItemName(''); setItemQuantity(''); setItemServings(0); }}>
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', fontWeight: 600, marginBottom: '1.25rem', marginTop: '2.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '1.25rem' }}>📍</span> Logistics & Security
+          </p>
+
           <div className="form-row">
             <div className="form-group">
-              <label className="form-label" htmlFor="foodName">Food Name *</label>
-              <input id="foodName" type="text" name="foodName" className="form-input" placeholder="e.g. Rice, Dal, Biryani" value={formData.foodName} onChange={handleChange} required />
-            </div>
-            <div className="form-group">
-              <label className="form-label" htmlFor="foodType">Food Type *</label>
+              <label className="form-label" htmlFor="foodType">Collective Food Category *</label>
               <select id="foodType" name="foodType" className="form-select" value={formData.foodType} onChange={handleChange}>
                 <option value="cooked">🍛 Cooked Food</option>
                 <option value="raw">🥬 Raw Ingredients</option>
@@ -155,22 +260,6 @@ export default function CreateDonation() {
                 <option value="fruits_vegetables">🍎 Fruits & Vegetables</option>
                 <option value="other">🍽️ Other</option>
               </select>
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label className="form-label" htmlFor="description">Description</label>
-            <textarea id="description" name="description" className="form-input" placeholder="Describe the food, packaging, any special notes..." value={formData.description} onChange={handleChange} rows={3} />
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label className="form-label" htmlFor="quantity">Quantity *</label>
-              <input id="quantity" type="text" name="quantity" className="form-input" placeholder="e.g. 5 kg, 10 boxes" value={formData.quantity} onChange={handleChange} required />
-            </div>
-            <div className="form-group">
-              <label className="form-label" htmlFor="servings">Number of Servings *</label>
-              <input id="servings" type="number" name="servings" className="form-input" placeholder="How many people can it serve?" value={formData.servings} onChange={handleChange} min="1" required />
             </div>
             <div className="form-group">
               <label className="form-label" htmlFor="urgency">Urgency Level</label>
@@ -182,13 +271,18 @@ export default function CreateDonation() {
             </div>
           </div>
 
+          <div className="form-group">
+            <label className="form-label" htmlFor="description">Bulk Description (Optional)</label>
+            <textarea id="description" name="description" className="form-input" placeholder="General notes about the overall donation..." value={formData.description} onChange={handleChange} rows={3} />
+          </div>
+
           <div className="form-row">
             <div className="form-group">
-              <label className="form-label" htmlFor="preparedAt">Prepared At *</label>
+              <label className="form-label" htmlFor="preparedAt">Universal Prep Time *</label>
               <input id="preparedAt" type="datetime-local" name="preparedAt" className="form-input" value={formData.preparedAt} onChange={handleChange} required />
             </div>
             <div className="form-group">
-              <label className="form-label" htmlFor="expiresAt">Best Before *</label>
+              <label className="form-label" htmlFor="expiresAt">Universal Best Before *</label>
               <input id="expiresAt" type="datetime-local" name="expiresAt" className="form-input" value={formData.expiresAt} onChange={handleChange} required />
             </div>
           </div>
@@ -203,92 +297,6 @@ export default function CreateDonation() {
             <input id="contactPhone" type="tel" name="contactPhone" className="form-input" placeholder="10-digit number" value={formData.contactPhone} onChange={handleChange} required />
           </div>
 
-          <div className="form-group">
-            <label className="form-label">🍲 Your Food Basket *</label>
-            <div className="media-manager">
-              {basket.length > 0 && (
-                <div className="image-preview-grid" style={{ marginBottom: '1.5rem' }}>
-                  {basket.map((item, i) => (
-                    <div key={i} className="preview-item" style={{ height: 'auto', width: '140px', borderStyle: 'solid' }}>
-                      <img src={URL.createObjectURL(item.file)} alt="Preview" style={{ height: '100px' }} />
-                      <div style={{ padding: '8px', background: 'var(--bg-secondary)', borderTop: '1px solid var(--border-light)' }}>
-                        <p style={{ fontSize: '0.75rem', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.name}</p>
-                      </div>
-                      <button type="button" className="preview-remove" onClick={() => removeFromBasket(i)}>×</button>
-                    </div>
-                  ))}
-                </div>
-              )}
-              
-              {!showItemForm ? (
-                <button 
-                  type="button" 
-                  className="btn btn-secondary" 
-                  style={{ width: '100%', border: '2px dashed var(--border-light)', background: 'transparent' }}
-                  onClick={() => setShowItemForm(true)}
-                >
-                  ➕ Add Food Item
-                </button>
-              ) : (
-                <div className="glass-card" style={{ padding: '1.25rem', border: '1px solid var(--primary-light)', animation: 'slideDown 0.3s ease' }}>
-                  <h4 style={{ fontSize: '0.875rem', marginBottom: '1rem' }}>Step 1: Capture or Select Photo</h4>
-                  <div className="media-actions" style={{ marginBottom: '1rem' }}>
-                    <label className="media-btn" style={{ background: currentFile ? 'rgba(16, 185, 129, 0.1)' : '' }}>
-                      <span>{currentFile ? '📸 Image Ready' : '📸 Take Photo'}</span>
-                      <input type="file" accept="image/*" capture="environment" onChange={(e) => setCurrentFile(e.target.files[0])} />
-                    </label>
-                    <label className="media-btn">
-                      <span>📁 Select File</span>
-                      <input type="file" accept="image/*" onChange={(e) => setCurrentFile(e.target.files[0])} />
-                    </label>
-                  </div>
-
-                  {currentFile && (
-                    <div className="item-details animate-fade-in">
-                      <h4 style={{ fontSize: '0.875rem', marginBottom: '0.75rem' }}>Step 2: Enter Item Details</h4>
-                      
-                      <div className="form-group" style={{ marginBottom: '1rem' }}>
-                        <label className="form-label" style={{ fontSize: '0.75rem' }}>Small Item Name *</label>
-                        <input 
-                          type="text" 
-                          className="form-input" 
-                          placeholder="e.g. Tomato Soup, Biryani..." 
-                          value={currentItemName} 
-                          onChange={(e) => setCurrentItemName(e.target.value)} 
-                          autoFocus
-                        />
-                      </div>
-
-                      <div className="form-row" style={{ gap: '1rem', marginBottom: '1.5rem' }}>
-                        <div className="form-group" style={{ marginBottom: 0 }}>
-                          <label className="form-label" style={{ fontSize: '0.7rem' }}>Prep Time (Optional)</label>
-                          <input type="datetime-local" className="form-input" style={{ fontSize: '0.8125rem', padding: '8px' }} value={itemPrepAt} onChange={e => setItemPrepAt(e.target.value)} />
-                        </div>
-                        <div className="form-group" style={{ marginBottom: 0 }}>
-                          <label className="form-label" style={{ fontSize: '0.7rem' }}>Expiry Time (Optional)</label>
-                          <input type="datetime-local" className="form-input" style={{ fontSize: '0.8125rem', padding: '8px' }} value={itemExpAt} onChange={e => setItemExpAt(e.target.value)} />
-                        </div>
-                      </div>
-
-                      <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
-                        <button type="button" className="btn btn-primary" style={{ flex: 1, padding: '12px' }} onClick={addToBasket}>
-                          ✅ Add to Basket
-                        </button>
-                        <button type="button" className="btn btn-ghost" style={{ padding: '12px' }} onClick={() => { setShowItemForm(false); setCurrentFile(null); setCurrentItemName(''); setItemPrepAt(''); setItemExpAt(''); }}>
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '12px' }}>
-              Add each food item individually with its photo for faster NGO matching.
-            </p>
-          </div>
-
-          {/* 🗺️ Interactive Map Picker */}
           <MapPicker
             latitude={formData.latitude}
             longitude={formData.longitude}
@@ -297,23 +305,23 @@ export default function CreateDonation() {
             label="Set Pickup Location"
           />
 
-          <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '1.5rem' }}>
             <input type="checkbox" id="isVegetarian" name="isVegetarian" checked={formData.isVegetarian} onChange={handleChange} style={{ width: 18, height: 18, accentColor: 'var(--primary)' }} />
             <label htmlFor="isVegetarian" className="form-label" style={{ marginBottom: 0, cursor: 'pointer' }}>
               🟢 This is vegetarian food
             </label>
           </div>
 
-          <div className="form-group" style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', padding: '1rem', background: 'rgba(239, 68, 68, 0.05)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(239, 68, 68, 0.1)' }}>
-            <input type="checkbox" id="safetyCertified" name="safetyCertified" checked={formData.safetyCertified} onChange={handleChange} style={{ width: 22, height: 22, accentColor: 'var(--danger)', marginTop: '2px' }} required />
+          <div className="form-group" style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', padding: '1rem', background: 'rgba(16, 185, 129, 0.05)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(16, 185, 129, 0.1)', marginTop: '1rem' }}>
+            <input type="checkbox" id="safetyCertified" name="safetyCertified" checked={formData.safetyCertified} onChange={handleChange} style={{ width: 22, height: 22, accentColor: 'var(--primary)', marginTop: '2px' }} required />
             <label htmlFor="safetyCertified" className="form-label" style={{ marginBottom: 0, cursor: 'pointer', fontSize: '0.875rem', color: 'var(--text-main)', fontWeight: 500 }}>
-              ⚠️ I certify that the food is safe for consumption, prepared in a hygienic environment, and does not contain any known restricted substances.
+              🛡️ I certify that the food is safe, hygienic, and follows all distribution guidelines.
             </label>
           </div>
 
-          <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+          <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
             <button type="submit" className="btn btn-primary btn-lg" disabled={loading} id="create-donation-submit" style={{ flex: 1 }}>
-              {loading ? 'Creating...' : '🍽️ Create Donation'}
+              {loading ? 'Creating Your Basket...' : '🚀 Submit Donation Basket'}
             </button>
             <button type="button" className="btn btn-ghost btn-lg" onClick={() => navigate(-1)}>
               Cancel
