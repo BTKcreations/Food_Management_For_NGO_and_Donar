@@ -37,9 +37,14 @@
 .dash-stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
+  gap: 1.25rem;
+  margin-bottom: 2.5rem;
 }
+
+.dash-stats-grid > *:nth-child(1) { animation-delay: 0.1s; }
+.dash-stats-grid > *:nth-child(2) { animation-delay: 0.2s; }
+.dash-stats-grid > *:nth-child(3) { animation-delay: 0.3s; }
+.dash-stats-grid > *:nth-child(4) { animation-delay: 0.4s; }
 
 /* Section */
 .dash-section {
@@ -71,25 +76,31 @@
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  padding: 1.5rem;
+  padding: 2rem;
   text-align: center;
   cursor: pointer;
-  transition: all var(--transition-normal);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
 }
 
 .quick-action-card:hover {
-  transform: translateY(-4px) !important;
-  box-shadow: 0 12px 40px rgba(16, 185, 129, 0.2);
+  border-color: var(--accent);
+  box-shadow: 0 15px 45px rgba(99, 102, 241, 0.2);
 }
 
 .quick-action-icon {
-  font-size: 2rem;
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  transition: transform 0.3s ease;
+}
+
+.quick-action-card:hover .quick-action-icon {
+  transform: scale(1.2) rotate(5deg);
 }
 
 .quick-action-label {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-secondary);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
 /* Donations Grid */

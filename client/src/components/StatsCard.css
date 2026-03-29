@@ -1,11 +1,11 @@
 .stats-card {
-  padding: 1.25rem;
+  padding: 1.5rem;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.25rem;
   position: relative;
   overflow: hidden;
-  animation: fadeInUp 0.5s ease both;
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .stats-card::before {
@@ -13,9 +13,8 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 3px;
+  width: 4px;
   height: 100%;
-  border-radius: 0 2px 2px 0;
 }
 
 .stats-card.color-primary::before { background: var(--primary); }
@@ -35,11 +34,32 @@
   flex-shrink: 0;
 }
 
-.stats-card.color-primary .stats-icon-wrapper { background: rgba(16, 185, 129, 0.15); }
-.stats-card.color-warning .stats-icon-wrapper { background: rgba(245, 158, 11, 0.15); }
-.stats-card.color-danger .stats-icon-wrapper { background: rgba(239, 68, 68, 0.15); }
-.stats-card.color-info .stats-icon-wrapper { background: rgba(59, 130, 246, 0.15); }
-.stats-card.color-accent .stats-icon-wrapper { background: rgba(99, 102, 241, 0.15); }
+/* Premium Icon Glows */
+.stats-card.color-primary .stats-icon-wrapper { 
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1));
+  color: var(--primary);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.1);
+}
+.stats-card.color-warning .stats-icon-wrapper { 
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.1));
+  color: var(--warning);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.1);
+}
+.stats-card.color-danger .stats-icon-wrapper { 
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.1));
+  color: var(--danger);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.1);
+}
+.stats-card.color-info .stats-icon-wrapper { 
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.1));
+  color: var(--info);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
+}
+.stats-card.color-accent .stats-icon-wrapper { 
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(99, 102, 241, 0.1));
+  color: var(--accent);
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.1);
+}
 
 .stats-content {
   display: flex;
@@ -48,16 +68,19 @@
 }
 
 .stats-value {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 800;
   font-family: var(--font-heading);
   line-height: 1;
+  letter-spacing: -0.02em;
 }
 
 .stats-label {
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
+  font-weight: 500;
   color: var(--text-muted);
-  margin-top: 4px;
+  margin-top: 6px;
+  letter-spacing: 0.01em;
 }
 
 .stats-trend {

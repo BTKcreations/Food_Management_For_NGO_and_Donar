@@ -144,8 +144,8 @@ export default function Dashboard() {
       {/* Welcome */}
       <div className="dash-welcome animate-fade-in">
         <div>
-          <h1 className="dash-greeting">{getGreeting()}, <span style={{ textTransform: 'capitalize' }}>{user?.name?.split(' ')[0]}</span>! 👋</h1>
-          <p className="dash-greeting-sub">
+          <h1 className="dash-greeting">{getGreeting()}, <span style={{ textTransform: 'capitalize', color: 'var(--primary)' }}>{user?.name?.split(' ')[0]}</span>! 👋</h1>
+          <p className="dash-greeting-sub" style={{ fontSize: '1.0625rem', fontWeight: 500 }}>
             {user.role === 'donor' && 'Thank you for your generosity. Check your impact below.'}
             {user.role === 'ngo' && 'Browse available food donations and manage your requests.'}
             {user.role === 'volunteer' && 'Check available pickups and track your deliveries.'}
@@ -159,32 +159,32 @@ export default function Dashboard() {
       </div>
 
       {/* 🌍 Sustainability Impact Dashboard (CSR) */}
-      <div className="dash-section animate-fade-in" style={{ marginBottom: '2rem' }}>
-        <div className="glass-card" style={{ padding: '1.5rem', background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05))', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-          <h2 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--primary)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            🌍 Your Sustainability Impact
+      <div className="dash-section animate-fade-in-up" style={{ marginBottom: '2.5rem', animationDelay: '0.05s' }}>
+        <div className="glass-card" style={{ padding: '2rem', background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(5, 150, 105, 0.03))', border: '1px solid rgba(16, 185, 129, 0.15)' }}>
+          <h2 style={{ fontSize: '0.875rem', fontWeight: 800, color: 'var(--primary)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '8px', textTransform: 'uppercase', letterSpacing: '2px' }}>
+            🌍 Sustainability Impact
           </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1.5rem' }}>
-            <div style={{ borderRight: '1px solid rgba(16, 185, 129, 0.2)' }}>
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>🥗 Meals Provided</p>
-              <p style={{ fontSize: '2rem', fontWeight: 800 }}>{user.role === 'donor' ? (analytics?.totalServingsProvided || 0) : (analytics?.totalReceived || 0) * 10 || 0}</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '2rem' }}>
+            <div style={{ borderRight: '1px solid rgba(16, 185, 129, 0.1)' }}>
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '8px', fontWeight: 700 }}>🥗 Meals Provided</p>
+              <p style={{ fontSize: '2.5rem', fontWeight: 900, fontFamily: 'var(--font-heading)', lineHeight: 1 }}>{user.role === 'donor' ? (analytics?.totalServingsProvided || 0) : (analytics?.totalReceived || 0) * 10 || 0}</p>
             </div>
-            <div style={{ borderRight: '1px solid rgba(16, 185, 129, 0.2)' }}>
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>📉 CO2 offset (KG)</p>
-              <p style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--primary)' }}>
-                {Math.round((user.role === 'donor' ? (analytics?.myDonations || 0) : (analytics?.totalReceived || 0)) * 2.5)} kg
+            <div style={{ borderRight: '1px solid rgba(16, 185, 129, 0.1)' }}>
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '8px', fontWeight: 700 }}>📉 CO2 offset (KG)</p>
+              <p style={{ fontSize: '2.5rem', fontWeight: 900, fontFamily: 'var(--font-heading)', lineHeight: 1, color: 'var(--primary)' }}>
+                {Math.round((user.role === 'donor' ? (analytics?.myDonations || 0) : (analytics?.totalReceived || 0)) * 2.5)}
               </p>
             </div>
             {user.role === 'volunteer' && (
               <div>
-                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>✨ Karma Points</p>
-                <p style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--accent)' }}>{user.karmaPoints || 0}</p>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '8px', fontWeight: 700 }}>✨ Karma Points</p>
+                <p style={{ fontSize: '2.5rem', fontWeight: 900, fontFamily: 'var(--font-heading)', lineHeight: 1, color: 'var(--accent)' }}>{user.karmaPoints || 0}</p>
               </div>
             )}
             {user.role !== 'volunteer' && (
                <div>
-                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>🛡️ Trust Score</p>
-                <p style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--info)' }}>{user.isVerifiedOrg ? '99+' : '65'}</p>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '8px', fontWeight: 700 }}>🛡️ Trust Score</p>
+                <p style={{ fontSize: '2.5rem', fontWeight: 900, fontFamily: 'var(--font-heading)', lineHeight: 1, color: 'var(--info)' }}>{user.isVerifiedOrg ? '99+' : '65'}</p>
               </div>
             )}
           </div>
