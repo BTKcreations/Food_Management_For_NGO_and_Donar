@@ -6,7 +6,7 @@ const {
 } = require('../controllers/userController');
 const { protect, authorize } = require('../middleware/auth');
 
-router.get('/', protect, authorize('admin'), getUsers);
+router.get('/', protect, authorize('admin', 'ngo'), getUsers);
 router.get('/volunteers/available', protect, getAvailableVolunteers);
 router.get('/:id', protect, getUser);
 router.put('/:id/verify', protect, authorize('admin'), verifyUser);

@@ -30,6 +30,12 @@ const donationSchema = new mongoose.Schema({
     required: [true, 'Estimated servings is required'],
     min: 1
   },
+  remainingServings: {
+    type: Number,
+    default: function() {
+      return this.servings;
+    }
+  },
   totalWeight: {
     type: Number,
     default: 0 // Optional weight in KG for impact calculations
@@ -67,7 +73,7 @@ const donationSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['available', 'claimed', 'picked_up', 'delivered', 'expired', 'cancelled'],
+    enum: ['available', 'partially_claimed', 'fully_claimed', 'picked_up', 'delivered', 'expired', 'cancelled'],
     default: 'available'
   },
   claimedBy: {

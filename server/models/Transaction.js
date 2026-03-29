@@ -16,6 +16,16 @@ const transactionSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  destinationType: {
+    type: String,
+    enum: ['receiver', 'warehouse'],
+    default: 'receiver'
+  },
+  allocatedServings: {
+    type: Number,
+    required: true,
+    min: 1
+  },
   deliveryImages: [{
     type: String
   }],

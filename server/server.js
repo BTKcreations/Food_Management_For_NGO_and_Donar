@@ -18,6 +18,7 @@ const transactionRoutes = require('./routes/transactions');
 const notificationRoutes = require('./routes/notifications');
 const analyticsRoutes = require('./routes/analytics');
 const userRoutes = require('./routes/users');
+const inventoryRoutes = require('./routes/inventory');
 
 const app = express();
 
@@ -109,6 +110,7 @@ app.use('/api/transactions', transactionRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/inventory', inventoryRoutes);
 
 // Root route for server identification
 app.get('/', (req, res) => {

@@ -24,11 +24,11 @@ const userSchema = new mongoose.Schema({
   phone: {
     type: String,
     required: [true, 'Phone number is required'],
-    match: [/^[0-9]{10}$/, 'Please provide a valid 10-digit phone number']
+    match: [/^[0-9]{10,12}$/, 'Please provide a valid 10 to 12 digit phone number']
   },
   role: {
     type: String,
-    enum: ['donor', 'ngo', 'volunteer', 'admin'],
+    enum: ['donor', 'ngo', 'volunteer', 'receiver', 'admin'],
     default: 'donor'
   },
   organization: {

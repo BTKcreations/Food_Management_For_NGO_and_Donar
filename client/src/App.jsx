@@ -7,6 +7,7 @@ import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import ReceiverDashboard from './pages/ReceiverDashboard';
 import CreateDonation from './pages/CreateDonation';
 import Donations from './pages/Donations';
 import MyDonations from './pages/MyDonations';
@@ -17,6 +18,8 @@ import Transactions from './pages/Transactions';
 import Analytics from './pages/Analytics';
 import AdminUsers from './pages/AdminUsers';
 import VolunteerMarket from './pages/VolunteerMarket';
+import Notifications from './pages/Notifications';
+import WarehouseManager from './pages/WarehouseManager';
 import './index.css';
 
 function AppContent() {
@@ -38,14 +41,17 @@ function AppContent() {
         <Route path="/donations" element={<ProtectedRoute><Donations /></ProtectedRoute>} />
         <Route path="/donations/:id" element={<ProtectedRoute><DonationDetails /></ProtectedRoute>} />
         <Route path="/transactions" element={<ProtectedRoute><Transactions /></ProtectedRoute>} />
+        <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
 
         {/* Donor routes */}
         <Route path="/donations/create" element={<ProtectedRoute roles={['donor', 'admin']}><CreateDonation /></ProtectedRoute>} />
         <Route path="/my-donations" element={<ProtectedRoute roles={['donor', 'admin']}><MyDonations /></ProtectedRoute>} />
 
-        {/* NGO routes */}
-        <Route path="/requests/create" element={<ProtectedRoute roles={['ngo', 'admin']}><CreateRequest /></ProtectedRoute>} />
-        <Route path="/my-requests" element={<ProtectedRoute roles={['ngo', 'admin']}><MyRequests /></ProtectedRoute>} />
+        {/* NGO/Receiver routes */}
+        <Route path="/requests/create" element={<ProtectedRoute roles={['receiver', 'ngo', 'admin']}><CreateRequest /></ProtectedRoute>} />
+        <Route path="/my-requests" element={<ProtectedRoute roles={['receiver', 'ngo', 'admin']}><MyRequests /></ProtectedRoute>} />
+        <Route path="/warehouse" element={<ProtectedRoute roles={['ngo', 'admin']}><WarehouseManager /></ProtectedRoute>} />
+        <Route path="/receiver-dashboard" element={<ProtectedRoute roles={['receiver', 'admin', 'ngo']}><ReceiverDashboard /></ProtectedRoute>} />
 
         {/* Volunteer routes */}
         <Route path="/my-deliveries" element={<ProtectedRoute roles={['volunteer', 'admin']}><Transactions /></ProtectedRoute>} />

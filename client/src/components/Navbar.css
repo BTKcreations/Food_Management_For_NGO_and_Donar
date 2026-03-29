@@ -125,17 +125,29 @@
 
 .notif-btn {
   background: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-light);
   border-radius: var(--radius-md);
   padding: 8px 12px;
   font-size: 1.125rem;
   position: relative;
   transition: all var(--transition-fast);
+  cursor: pointer;
 }
 
 .notif-btn:hover {
   border-color: var(--primary);
   background: rgba(16, 185, 129, 0.1);
+  transform: scale(1.05);
+}
+
+.notif-btn.has-unread {
+  animation: bellPulse 2s infinite;
+}
+
+@keyframes bellPulse {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
 }
 
 .notif-badge {
@@ -157,30 +169,39 @@
 
 .notif-dropdown {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 12px);
   right: 0;
-  width: 360px;
-  max-height: 420px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
+  width: 380px;
+  max-height: 480px;
+  background: rgba(11, 15, 26, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6),
+              0 0 40px rgba(16, 185, 129, 0.05);
   overflow: hidden;
-  animation: slideDown 0.2s ease;
+  animation: slideDownFade 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 200;
+}
+
+@keyframes slideDownFade {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .notif-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
+  padding: 1.25rem 1.5rem;
+  background: rgba(255, 255, 255, 0.03);
   border-bottom: 1px solid var(--border-light);
 }
 
 .notif-header h4 {
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .notif-mark-all {
@@ -188,54 +209,95 @@
   border: none;
   color: var(--primary);
   font-size: 0.8125rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s;
+}
+
+.notif-mark-all:hover {
+  background: rgba(16, 185, 129, 0.1);
 }
 
 .notif-list {
-  max-height: 350px;
+  max-height: 360px;
   overflow-y: auto;
 }
 
 .notif-item {
-  padding: 14px 20px;
+  padding: 1.25rem 1.5rem;
   border-bottom: 1px solid var(--border-light);
   cursor: pointer;
-  transition: background var(--transition-fast);
+  transition: all 0.2s;
+  position: relative;
 }
 
 .notif-item:hover {
-  background: var(--bg-tertiary);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .notif-item.unread {
-  border-left: 3px solid var(--primary);
-  background: rgba(16, 185, 129, 0.05);
+  background: rgba(16, 185, 129, 0.03);
+}
+
+.notif-dot {
+  display: none;
+  width: 8px;
+  height: 8px;
+  background: var(--primary);
+  border-radius: 50%;
+  position: absolute;
+  left: 12px;
+  top: 24px;
+}
+
+.notif-item.unread .notif-dot {
+  display: block;
 }
 
 .notif-title {
-  font-size: 0.875rem;
-  font-weight: 600;
-  margin-bottom: 4px;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--text-primary);
+  line-height: 1.2;
 }
 
 .notif-message {
   font-size: 0.8125rem;
   color: var(--text-muted);
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 .notif-time {
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
-  margin-top: 6px;
+  margin-top: 8px;
+  font-weight: 500;
+}
+
+.notif-view-all {
+  display: block;
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.02);
+  border-top: 1px solid var(--border-light);
+  transition: all 0.2s;
+}
+
+.notif-view-all:hover {
+  color: var(--primary);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .notif-empty {
-  padding: 2rem;
+  padding: 3rem 2rem;
   text-align: center;
   color: var(--text-muted);
-  font-size: 0.875rem;
 }
 
 /* ========== USER INFO ========== */

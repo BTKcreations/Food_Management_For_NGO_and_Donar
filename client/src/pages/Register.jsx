@@ -95,6 +95,7 @@ export default function Register() {
                   <option value="donor">🏪 Food Donor</option>
                   <option value="ngo">🏛️ NGO / Food Bank</option>
                   <option value="volunteer">🙋 Volunteer</option>
+                  <option value="receiver">😋 Recipient / Receiver</option>
                 </select>
               </div>
             </div>

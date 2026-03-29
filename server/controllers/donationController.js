@@ -193,32 +193,32 @@ exports.getMyDonations = async (req, res) => {
 // @route   PUT /api/donations/:id/claim
 exports.claimDonation = async (req, res) => {
   try {
+    const { claimQuantity, destinationType, receiverId, notes } = req.body;
     const donation = await Donation.findById(req.params.id);
 
     if (!donation) {
-      return res.status(404).json({
-        success: false,
-        message: 'Donation not found'
-      });
+      return res.status(404).json({ success: false, message: 'Donation not found' });
     }
 
-    if (donation.status !== 'available') {
-      return res.status(400).json({
-        success: false,
-        message: `Donation is already ${donation.status}`
-      });
+    if (!['available', 'partially_claimed'].includes(donation.status)) {
+      return res.status(400).json({ success: false, message: `Donation is ${donation.status}` });
     }
 
-    if (new Date(donation.expiresAt) < new Date()) {
-      donation.status = 'expired';
-      await donation.save();
-      return res.status(400).json({
-        success: false,
-        message: 'Donation has expired'
-      });
+    const amountToClaim = parseInt(claimQuantity) || donation.remainingServings;
+
+    if (amountToClaim > donation.remainingServings) {
+      return res.status(400).json({ success: false, message: `Only ${donation.remainingServings} servings left` });
     }
 
-    donation.status = 'claimed';
+    // Determine destination
+    let finalReceiverId = req.user._id; // Default is NGO itself
+    if (destinationType === 'receiver' && receiverId) {
+      finalReceiverId = receiverId;
+    }
+
+    // Update donation quantity
+    donation.remainingServings -= amountToClaim;
+    donation.status = donation.remainingServings <= 0 ? 'fully_claimed' : 'partially_claimed';
     donation.claimedBy = req.user._id;
     donation.claimedAt = new Date();
     await donation.save();
@@ -228,42 +228,37 @@ exports.claimDonation = async (req, res) => {
       recipient: donation.donor,
       sender: req.user._id,
       type: 'donation_claimed',
-      title: '✅ Your donation has been claimed!',
-      message: `${req.user.name} (${req.user.organization || req.user.role}) has claimed your donation of ${donation.foodName}.`,
+      title: '✅ Your donation is being redistributed!',
+      message: `${req.user.name} has claimed ${amountToClaim} servings of ${donation.foodName} for ${destinationType === 'warehouse' ? 'their warehouse' : 'a recipient'}.`,
       relatedDonation: donation._id
     });
 
-    // Update receiver stats
-    await User.findByIdAndUpdate(req.user._id, { $inc: { totalReceived: 1 } });
-
-    // CREATE TRANSACTION RECORD WITH SECURE CODES
-    const pickupCode = Math.floor(1000 + Math.random() * 9000).toString(); // Secure 4-digit codes
+    // Create Transaction
+    const pickupCode = Math.floor(1000 + Math.random() * 9000).toString();
     const deliveryCode = Math.floor(1000 + Math.random() * 9000).toString();
 
-    console.log(`Creating transaction for donation ${donation._id} with codes: P:${pickupCode} D:${deliveryCode}`);
-    const newTransaction = await Transaction.create({
+    const transaction = await Transaction.create({
       donation: donation._id,
       donor: donation.donor,
-      receiver: req.user._id,
+      receiver: finalReceiverId,
+      destinationType: destinationType || 'receiver',
+      allocatedServings: amountToClaim,
       status: 'accepted',
       pickupLocation: donation.location,
+      notes: notes || `Redistribution of ${amountToClaim} servings`,
       pickupCode,
       deliveryCode
     });
-    console.log('Transaction created:', newTransaction._id);
 
     res.status(200).json({
       success: true,
-      message: 'Donation claimed successfully',
-      donation
+      message: `${amountToClaim} servings claimed successfully`,
+      donation,
+      transaction
     });
   } catch (error) {
     console.error('Claim donation error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error claiming donation',
-      error: error.message
-    });
+    res.status(500).json({ success: false, message: 'Error claiming donation', error: error.message });
   }
 };
 

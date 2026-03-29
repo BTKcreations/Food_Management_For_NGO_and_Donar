@@ -2,6 +2,7 @@ const Transaction = require('../models/Transaction');
 const Donation = require('../models/Donation');
 const User = require('../models/User');
 const Notification = require('../models/Notification');
+const Inventory = require('../models/Inventory');
 
 // @desc    Create a transaction when donation is claimed
 // @route   POST /api/transactions
@@ -241,9 +242,132 @@ exports.updateTransactionStatus = async (req, res) => {
           } 
         });
       }
+
+      // WAREHOUSE LOGIC: If destination is warehouse, add to NGO inventory
+      if (transaction.destinationType === 'warehouse') {
+        const Donation = require('../models/Donation');
+        const donation = await Donation.findById(transaction.donation);
+        
+        await Inventory.create({
+          ngo: transaction.receiver, // NGO is the receiver in this case
+          foodName: donation.foodName,
+          foodType: donation.foodType,
+          quantity: transaction.allocatedServings,
+          expiryDate: donation.expiresAt,
+          sourceDonation: donation._id
+        });
+      } else {
+        // Increment receiver stats
+        await User.findByIdAndUpdate(transaction.receiver, { $inc: { totalReceived: 1 } });
+      }
     }
 
     await transaction.save();
+
+    // TRIGGER NOTIFICATIONS FOR TRANSACTION UPDATES
+    const notifs = [];
+    if (status === 'in_transit') {
+      // Notify Donor
+      notifs.push({
+        recipient: transaction.donor,
+        sender: req.user._id,
+        type: 'donation_picked_up',
+        title: '📦 Your food was picked up!',
+        message: `The volunteer has picked up ${transaction.donation?.foodName} and is on their way.`,
+        relatedDonation: transaction.donation?._id,
+        relatedTransaction: transaction._id
+      });
+      // Notify NGO (Receiver)
+      notifs.push({
+        recipient: transaction.receiver,
+        sender: req.user._id,
+        type: 'donation_picked_up',
+        title: '🚚 Your food is coming!',
+        message: `A volunteer is now in transit with your claimed food (${transaction.donation?.foodName}).`,
+        relatedDonation: transaction.donation?._id,
+        relatedTransaction: transaction._id
+      });
+    } else if (status === 'completed') {
+       // Notify Donor
+       notifs.push({
+        recipient: transaction.donor,
+        sender: req.user._id,
+        type: 'donation_delivered',
+        title: '✅ Mission Accomplished!',
+        message: `Your donation of ${transaction.donation?.foodName} was delivered successfully.`,
+        relatedDonation: transaction.donation?._id,
+        relatedTransaction: transaction._id
+      });
+      // Notify NGO
+      notifs.push({
+        recipient: transaction.receiver,
+        sender: req.user._id,
+        type: 'donation_delivered',
+        title: '🍱 Food Arrived!',
+        message: `The food you claimed (${transaction.donation?.foodName}) has been delivered.`,
+        relatedDonation: transaction.donation?._id,
+        relatedTransaction: transaction._id
+      });
+    }
+
+    // Create appropriate notifications for Donor and NGO
+    let donorTitle = '', donorMsg = '', donorNotifType = 'system_alert';
+    let receiverTitle = '', receiverMsg = '', receiverNotifType = 'system_alert';
+
+    if (status === 'picked_up') {
+      // Notify Donor
+      donorTitle = '📦 Food picked up!';
+      donorMsg = `Your donation of ${transaction.donation?.foodName} has been picked up and is on its way.`;
+      donorNotifType = 'donation_picked_up';
+      
+      // Notify NGO (Receiver)
+      receiverTitle = '🚚 Food is in transit!';
+      receiverMsg = `A volunteer has picked up the food (${transaction.donation?.foodName}) and is heading your way.`;
+      receiverNotifType = 'donation_picked_up';
+    } else if (status === 'delivered') {
+      // Notify Donor
+      donorTitle = '🎉 Food delivered successfully!';
+      donorMsg = `Your donation of ${transaction.donation?.foodName} has been delivered to those in need. Thank you!`;
+      donorNotifType = 'donation_delivered';
+      
+      // Notify NGO (Receiver)
+      receiverTitle = '✅ Food received!';
+      receiverMsg = `The donation of ${transaction.donation?.foodName} has been successfully delivered to your location.`;
+      receiverNotifType = 'donation_delivered';
+    }
+
+    // Send notifications
+    const statusNotifs = [];
+    if (donorTitle) {
+      statusNotifs.push({
+        recipient: transaction.donor,
+        sender: req.user._id,
+        type: donorNotifType,
+        title: donorTitle,
+        message: donorMsg,
+        relatedDonation: transaction.donation?._id,
+        relatedTransaction: transaction._id
+      });
+    }
+    if (receiverTitle && transaction.receiver) {
+      statusNotifs.push({
+        recipient: transaction.receiver,
+        sender: req.user._id,
+        type: receiverNotifType,
+        title: receiverTitle,
+        message: receiverMsg,
+        relatedDonation: transaction.donation?._id,
+        relatedTransaction: transaction._id
+      });
+    }
+
+    if (statusNotifs.length > 0) {
+      await Notification.insertMany(statusNotifs);
+    }
+
+    if (notifs.length > 0) {
+      await Notification.insertMany(notifs);
+    }
 
     res.status(200).json({
       success: true,

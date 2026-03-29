@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
+import ReceiverDashboard from './ReceiverDashboard';
 import StatsCard from '../components/StatsCard';
 import DonationCard from '../components/DonationCard';
 import { DonationCardSkeleton } from '../components/Skeleton';
@@ -9,6 +10,12 @@ import './Dashboard.css';
 
 export default function Dashboard() {
   const { user } = useAuth();
+  
+  // 🧭 Role-Based Redirect: If receiver, show ReceiverDashboard
+  if (user?.role === 'receiver') {
+    return <ReceiverDashboard />;
+  }
+
   const [analytics, setAnalytics] = useState(null);
   const [recentItems, setRecentItems] = useState([]);
   const [loading, setLoading] = useState(true);

@@ -82,8 +82,17 @@ export default function Navbar() {
     if (user.role === 'ngo') {
       links.push(
         { path: '/donations', label: 'Browse Food', icon: '🔍' },
+        { path: '/warehouse', label: 'Warehouse', icon: '🏭' },
         { path: '/requests/create', label: 'New Request', icon: '📋' },
         { path: '/my-requests', label: 'My Requests', icon: '📝' }
+      );
+    }
+
+    if (user.role === 'receiver') {
+      links.push(
+        { path: '/receiver-dashboard', label: 'My Needs', icon: '🍽️' },
+        { path: '/requests/create', label: 'Request Food', icon: '➕' },
+        { path: '/my-requests', label: 'Need History', icon: '📝' }
       );
     }
 
@@ -155,7 +164,11 @@ export default function Navbar() {
           <ThemeToggle />
           {/* Notifications */}
           <div className="notif-wrapper" ref={notifRef}>
-            <button className="notif-btn" onClick={() => setNotifOpen(!notifOpen)} id="notification-bell">
+            <button 
+              className={`notif-btn ${unreadCount > 0 ? 'has-unread' : ''}`} 
+              onClick={() => setNotifOpen(!notifOpen)} 
+              id="notification-bell"
+            >
               🔔
               {unreadCount > 0 && <span className="notif-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>}
             </button>
@@ -173,14 +186,27 @@ export default function Navbar() {
                     <p className="notif-empty">No notifications yet</p>
                   ) : (
                     notifications.map(n => (
-                      <div key={n._id} className={`notif-item ${!n.isRead ? 'unread' : ''}`}>
-                        <div className="notif-title">{n.title}</div>
+                      <div 
+                        key={n._id} 
+                        className={`notif-item ${!n.isRead ? 'unread' : ''}`}
+                        onClick={() => {
+                          navigate(`/donations/${n.relatedDonation || ''}`);
+                          setNotifOpen(false);
+                        }}
+                      >
+                        <div className="notif-title">
+                          <span className="notif-dot"></span>
+                          {n.title}
+                        </div>
                         <div className="notif-message">{n.message}</div>
-                        <div className="notif-time">{new Date(n.createdAt).toLocaleDateString()}</div>
+                        <div className="notif-time">{new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {new Date(n.createdAt).toLocaleDateString()}</div>
                       </div>
                     ))
                   )}
                 </div>
+                <Link to="/notifications" className="notif-view-all" onClick={() => setNotifOpen(false)}>
+                  View all notifications
+                </Link>
               </div>
             )}
           </div>

@@ -18,6 +18,15 @@ export default function DonationDetails() {
   const [deliveryImages, setDeliveryImages] = useState([]);
   const [codeError, setCodeError] = useState('');
 
+  const [showClaimModal, setShowClaimModal] = useState(false);
+  const [claimData, setClaimData] = useState({
+    claimQuantity: '',
+    destinationType: 'receiver',
+    receiverId: '',
+    notes: ''
+  });
+  const [receivers, setReceivers] = useState([]);
+
   useEffect(() => {
     fetchDonation();
   }, [id]);
@@ -26,23 +35,24 @@ export default function DonationDetails() {
     try {
       const res = await api.get(`/donations/${id}`);
       setDonation(res.data.donation);
+      setClaimData(prev => ({ ...prev, claimQuantity: res.data.donation.remainingServings }));
       
-      // If claimed, try to find the associated transaction to get codes/details
-      if (res.data.donation.status !== 'available') {
+      // If NGO, pre-fetch potential receivers for matching
+      if (user?.role === 'ngo') {
+        const userRes = await api.get('/users?role=receiver');
+        setReceivers(userRes.data.users || []);
+      }
+
+      // If claimed, try to find the associated transaction
+      if (res.data.donation.status !== 'available' && res.data.donation.status !== 'partially_claimed') {
         try {
           const transRes = await api.get('/transactions');
           const relatedTrans = transRes.data.transactions.find(t => t.donation?._id === id);
           if (relatedTrans) {
-            // Fetch full transaction details (including codes if authorized)
             const fullTransRes = await api.get(`/transactions/${relatedTrans._id}`);
             setTransaction(fullTransRes.data.transaction);
           }
-        } catch (transErr) {
-          // 403 is expected if the current user isn't part of this transaction
-          if (transErr.response?.status !== 403) {
-            console.error('Transaction fetch error:', transErr);
-          }
-        }
+        } catch (transErr) {}
       }
     } catch (err) {
       console.error('Error:', err);
@@ -57,12 +67,10 @@ export default function DonationDetails() {
     let heartbeatInterval = null;
 
     if (user?.role === 'volunteer' && transaction?.status === 'in_transit') {
-      // 1. Precise Browser Geolocation Tracking
       if ("geolocation" in navigator) {
         watchId = navigator.geolocation.watchPosition(
           (pos) => {
             const { latitude, longitude } = pos.coords;
-            // Immediate local update for volunteer
             setTransaction(prev => ({
               ...prev,
               liveLocation: { type: 'Point', coordinates: [longitude, latitude] }
@@ -72,7 +80,6 @@ export default function DonationDetails() {
           { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
         );
 
-        // 2. Periodic "Pulse" to the Server
         heartbeatInterval = setInterval(async () => {
           try {
             const pos = await new Promise((resolve, reject) => {
@@ -83,11 +90,10 @@ export default function DonationDetails() {
               longitude: pos.coords.longitude
             });
           } catch (err) {}
-        }, 15000); // Pulse every 15 seconds
+        }, 15000);
       }
     }
 
-    // 🔄 Live Polling for NGOs/Donors to see the movement
     let observerInterval = null;
     if (user?.role !== 'volunteer' && transaction?.status === 'in_transit') {
       observerInterval = setInterval(async () => {
@@ -95,7 +101,7 @@ export default function DonationDetails() {
           const transRes = await api.get(`/transactions/${transaction._id}`);
           setTransaction(transRes.data.transaction);
         } catch (err) {}
-      }, 10000); // Refresh observer map every 10 seconds
+      }, 10000);
     }
 
     return () => {
@@ -105,10 +111,12 @@ export default function DonationDetails() {
     };
   }, [user, transaction?.status, transaction?._id]);
 
-  const handleClaim = async () => {
+  const handleClaimSubmit = async (e) => {
+    e.preventDefault();
     try {
-      await api.put(`/donations/${id}/claim`);
-      setMessage('Donation claimed successfully!');
+      await api.put(`/donations/${id}/claim`, claimData);
+      setMessage(`${claimData.claimQuantity} servings claimed successfully!`);
+      setShowClaimModal(false);
       fetchDonation();
     } catch (err) {
       setMessage(err.response?.data?.message || 'Error claiming donation');
@@ -220,12 +228,12 @@ export default function DonationDetails() {
         {/* Details grid */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
           <div className="glass-card" style={{ padding: '1rem' }}>
-            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Quantity</p>
-            <p style={{ fontWeight: 600 }}>{donation.quantity}</p>
-          </div>
-          <div className="glass-card" style={{ padding: '1rem' }}>
-            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Servings</p>
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Original Quantity</p>
             <p style={{ fontWeight: 600 }}>{donation.servings} servings</p>
+          </div>
+          <div className="glass-card" style={{ padding: '1rem', border: '1px solid var(--primary)' }}>
+            <p style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 700, marginBottom: '4px' }}>Remaining Bulk</p>
+            <p style={{ fontWeight: 800, fontSize: '1.25rem' }}>{donation.remainingServings} servings</p>
           </div>
           <div className="glass-card" style={{ padding: '1rem' }}>
             <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Prepared At</p>
@@ -398,9 +406,65 @@ export default function DonationDetails() {
         {/* Actions */}
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', paddingTop: '1rem', borderTop: '1px solid var(--border-light)' }}>
           {canClaim && (
-            <button className="btn btn-primary" onClick={handleClaim}>
-              🤝 Claim This Food
+            <button className="btn btn-primary" onClick={() => setShowClaimModal(true)}>
+              🤝 Logic Claim / Redistribute
             </button>
+          )}
+
+          {showClaimModal && (
+            <div className="modal-overlay">
+              <div className="modal-content glass-card animate-zoom-in">
+                <h2 style={{ marginBottom: '1rem' }}>Smart Redistribution</h2>
+                <form onSubmit={handleClaimSubmit}>
+                  <div className="form-group">
+                    <label className="form-label">How many servings to claim? (Max {donation.remainingServings})</label>
+                    <input 
+                      type="number" 
+                      className="form-input" 
+                      max={donation.remainingServings} 
+                      min="1" 
+                      value={claimData.claimQuantity}
+                      onChange={(e) => setClaimData({...claimData, claimQuantity: e.target.value})}
+                      required
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label">Destination Logic</label>
+                    <select 
+                      className="form-select" 
+                      value={claimData.destinationType}
+                      onChange={(e) => setClaimData({...claimData, destinationType: e.target.value})}
+                    >
+                      <option value="receiver">Direct to Receiver Request</option>
+                      <option value="warehouse">NGO Warehouse (Bulk Storage)</option>
+                    </select>
+                  </div>
+
+                  {claimData.destinationType === 'receiver' && (
+                    <div className="form-group">
+                      <label className="form-label">Match to Receiver</label>
+                      <select 
+                        className="form-select" 
+                        value={claimData.receiverId}
+                        onChange={(e) => setClaimData({...claimData, receiverId: e.target.value})}
+                        required
+                      >
+                        <option value="">Select a receiver...</option>
+                        {receivers.map(r => (
+                          <option key={r._id} value={r._id}>{r.name} ({r.organization || 'Individual'})</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
+                    <button type="button" className="btn btn-ghost" onClick={() => setShowClaimModal(false)}>Cancel</button>
+                    <button type="submit" className="btn btn-primary">Process Redistribution</button>
+                  </div>
+                </form>
+              </div>
+            </div>
           )}
           
           {/* Legend/Alert for safety */}
@@ -417,6 +481,37 @@ export default function DonationDetails() {
           )}
         </div>
       </div>
+      <style>{`
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.8);
+          backdrop-filter: blur(8px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+          padding: 1.5rem;
+        }
+        .modal-content {
+          width: 100%;
+          max-width: 500px;
+          padding: 2.5rem;
+          background: var(--bg-secondary);
+          border: 1px solid var(--border-light);
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .animate-zoom-in {
+          animation: zoomIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes zoomIn {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
+      `}</style>
     </div>
   );
 }
