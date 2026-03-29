@@ -47,8 +47,23 @@ app.use('/api', limiter);
 app.use(compression());
 
 // Middleware
+// CORS Configuration
+const allowedOrigins = [
+  'http://localhost:5173', 
+  'http://localhost:3000',
+  process.env.FRONTEND_URL // Dynamic Vercel URL from Render dashboard
+].filter(Boolean); // Remove null/undefined if FRONTEND_URL isn't set
+
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000'],
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 
