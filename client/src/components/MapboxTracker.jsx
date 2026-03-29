@@ -4,7 +4,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 
 // TODO: Replace with your actual Mapbox Access Token
 // You can get one for FREE at https://www.mapbox.com/
-const MAPBOX_TOKEN = 'pk.eyJ1Ijoic2FpLWtyaXNobmEiLCJhIjoiY203cmg0YWNqMDBuOTJqc2VlZjZ1bmNhMyJ9.XjG4E-G3-G-G-G-G-G-G'; 
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1Ijoic2FpLWtyaXNobmEiLCJhIjoiY203cmg0YWNqMDBuOTJqc2VlZjZ1bmNhMyJ9.XjG4E-G3-G-G-G-G-G-G'; 
 
 export default function MapboxTracker({ 
   volunteerLocation, 

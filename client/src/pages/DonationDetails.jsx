@@ -201,7 +201,7 @@ export default function DonationDetails() {
               {donation.images.map((img, i) => (
                 <img 
                   key={i} 
-                  src={`http://localhost:5000${img}`} 
+                  src={`${import.meta.env.VITE_IMAGE_BASE_URL || 'http://localhost:5000'}${img}`} 
                   alt="Food" 
                   style={{ width: '100%', height: '100px', objectFit: 'cover', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-light)' }} 
                 />
@@ -370,7 +370,7 @@ export default function DonationDetails() {
                   {transaction.deliveryImages.map((img, i) => (
                     <img 
                       key={i} 
-                      src={`http://localhost:5000${img}`} 
+                      src={`${import.meta.env.VITE_IMAGE_BASE_URL || 'http://localhost:5000'}${img}`} 
                       alt="Distribution" 
                       style={{ width: '100%', height: '100px', objectFit: 'cover', borderRadius: 'var(--radius-sm)', border: '1px solid var(--primary-light)' }} 
                     />
