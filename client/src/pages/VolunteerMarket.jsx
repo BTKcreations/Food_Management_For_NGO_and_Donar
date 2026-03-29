@@ -57,7 +57,12 @@ export default function VolunteerMarket() {
           </div>
         ) : (
           transactions.map(t => (
-            <div key={t._id} className="glass-card animate-fade-in" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div 
+              key={t._id} 
+              className="glass-card animate-fade-in clickable-card" 
+              style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}
+              onClick={() => navigate(`/donations/${t.donation?._id}`)}
+            >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
                   <h3 style={{ fontSize: '1.125rem', fontWeight: 700 }}>{t.donation?.foodName}</h3>
@@ -87,7 +92,7 @@ export default function VolunteerMarket() {
               <button 
                 className="btn btn-primary" 
                 style={{ marginTop: 'auto', width: '100%' }}
-                onClick={() => handleAssign(t._id)}
+                onClick={(e) => { e.stopPropagation(); handleAssign(t._id); }}
               >
                 🤝 Accept Delivery
               </button>

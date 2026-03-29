@@ -74,6 +74,7 @@ export default function Navbar() {
 
     if (user.role === 'donor') {
       links.push(
+        { path: '/requests', label: 'Community Needs', icon: '🤝' },
         { path: '/donations/create', label: 'New Donation', icon: '➕' },
         { path: '/my-donations', label: 'My Donations', icon: '🍽️' }
       );
@@ -82,6 +83,7 @@ export default function Navbar() {
     if (user.role === 'ngo') {
       links.push(
         { path: '/donations', label: 'Browse Food', icon: '🔍' },
+        { path: '/requests', label: 'Community Needs', icon: '🤝' },
         { path: '/warehouse', label: 'Warehouse', icon: '🏭' },
         { path: '/requests/create', label: 'New Request', icon: '📋' },
         { path: '/my-requests', label: 'My Requests', icon: '📝' }
@@ -99,6 +101,7 @@ export default function Navbar() {
     if (user.role === 'volunteer') {
       links.push(
         { path: '/donations', label: 'Browse Food', icon: '🔍' },
+        { path: '/requests', label: 'Community Needs', icon: '🤝' },
         { path: '/volunteer-market', label: 'Delivery Market', icon: '📦' },
         { path: '/my-deliveries', label: 'My Deliveries', icon: '🚗' }
       );
@@ -107,6 +110,7 @@ export default function Navbar() {
     if (user.role === 'admin') {
       links.push(
         { path: '/donations', label: 'All Donations', icon: '🍽️' },
+        { path: '/requests', label: 'All Requests', icon: '🤝' },
         { path: '/users', label: 'Users', icon: '👥' },
         { path: '/analytics', label: 'Analytics', icon: '📈' }
       );

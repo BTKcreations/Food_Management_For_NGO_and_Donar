@@ -14,6 +14,7 @@ import MyDonations from './pages/MyDonations';
 import DonationDetails from './pages/DonationDetails';
 import CreateRequest from './pages/CreateRequest';
 import MyRequests from './pages/MyRequests';
+import Requests from './pages/Requests';
 import Transactions from './pages/Transactions';
 import Analytics from './pages/Analytics';
 import AdminUsers from './pages/AdminUsers';
@@ -42,6 +43,7 @@ function AppContent() {
         <Route path="/donations/:id" element={<ProtectedRoute><DonationDetails /></ProtectedRoute>} />
         <Route path="/transactions" element={<ProtectedRoute><Transactions /></ProtectedRoute>} />
         <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+        <Route path="/requests" element={<ProtectedRoute><Requests /></ProtectedRoute>} />
 
         {/* Donor routes */}
         <Route path="/donations/create" element={<ProtectedRoute roles={['donor', 'admin']}><CreateDonation /></ProtectedRoute>} />

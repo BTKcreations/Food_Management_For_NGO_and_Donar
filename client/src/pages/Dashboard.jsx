@@ -69,26 +69,26 @@ export default function Dashboard() {
 
     if (user.role === 'donor') {
       return [
-        { icon: '🍽️', label: 'Total Donations', value: analytics.myDonations || 0, color: 'primary' },
-        { icon: '✅', label: 'Successfully Delivered', value: analytics.deliveredDonations || 0, color: 'info' },
-        { icon: '👥', label: 'Servings Provided', value: analytics.totalServingsProvided || 0, color: 'warning' },
+        { icon: '🍽️', label: 'Total Donations', value: analytics.myDonations || 0, color: 'primary', path: '/my-donations' },
+        { icon: '✅', label: 'Successfully Delivered', value: analytics.deliveredDonations || 0, color: 'info', path: '/transactions' },
+        { icon: '👥', label: 'Servings Provided', value: analytics.totalServingsProvided || 0, color: 'warning', path: '/my-donations' },
         { icon: '⭐', label: 'Impact Score', value: analytics.impactScore || 0, color: 'accent' }
       ];
     }
 
     if (user.role === 'ngo') {
       return [
-        { icon: '📦', label: 'Claimed Donations', value: analytics.claimedDonations || 0, color: 'primary' },
-        { icon: '📋', label: 'My Requests', value: analytics.myRequests || 0, color: 'info' },
-        { icon: '✅', label: 'Fulfilled Requests', value: analytics.fulfilledRequests || 0, color: 'warning' },
-        { icon: '🍽️', label: 'Total Received', value: analytics.totalReceived || 0, color: 'accent' }
+        { icon: '📦', label: 'Claimed Donations', value: analytics.claimedDonations || 0, color: 'primary', path: '/donations' },
+        { icon: '📋', label: 'My Requests', value: analytics.myRequests || 0, color: 'info', path: '/my-requests' },
+        { icon: '✅', label: 'Fulfilled Requests', value: analytics.fulfilledRequests || 0, color: 'warning', path: '/my-requests' },
+        { icon: '🍽️', label: 'Total Received', value: analytics.totalReceived || 0, color: 'accent', path: '/donations' }
       ];
     }
 
     if (user.role === 'volunteer') {
       return [
-        { icon: '🚗', label: 'My Deliveries', value: analytics.myDeliveries || 0, color: 'primary' },
-        { icon: '✅', label: 'Completed', value: analytics.completedDeliveries || 0, color: 'info' },
+        { icon: '🚗', label: 'My Deliveries', value: analytics.myDeliveries || 0, color: 'primary', path: '/my-deliveries' },
+        { icon: '✅', label: 'Completed', value: analytics.completedDeliveries || 0, color: 'info', path: '/my-deliveries' },
         { icon: '📦', label: 'Total Deliveries', value: analytics.totalDeliveries || 0, color: 'warning' }
       ];
     }

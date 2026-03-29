@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
+import RequestCard from '../components/RequestCard';
+import StatsCard from '../components/StatsCard';
 import './Dashboard.css';
 
 export default function ReceiverDashboard() {
+  const navigate = useNavigate();
   const [requests, setRequests] = useState([]);
   const [deliveries, setDeliveries] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -41,20 +44,20 @@ export default function ReceiverDashboard() {
       </div>
 
       <div className="stats-grid">
-        <div className="stats-card animate-slide-up" style={{ animationDelay: '0.1s' }}>
-          <div className="stats-icon">📝</div>
-          <div className="stats-info">
-            <div className="stats-value">{requests.length}</div>
-            <div className="stats-label">Active Requests</div>
-          </div>
-        </div>
-        <div className="stats-card animate-slide-up" style={{ animationDelay: '0.2s' }}>
-          <div className="stats-icon">🚚</div>
-          <div className="stats-info">
-            <div className="stats-value">{deliveries.length}</div>
-            <div className="stats-label">Incoming Deliveries</div>
-          </div>
-        </div>
+        <StatsCard 
+          icon="📝" 
+          label="Active Requests" 
+          value={requests.length} 
+          color="primary" 
+          path="/my-requests"
+        />
+        <StatsCard 
+          icon="🚚" 
+          label="Incoming Deliveries" 
+          value={deliveries.length} 
+          color="info" 
+          path="/transactions"
+        />
       </div>
 
       <div className="dashboard-grid">
@@ -65,14 +68,18 @@ export default function ReceiverDashboard() {
           ) : (
             <div className="active-list">
               {deliveries.map(delivery => (
-                <div key={delivery._id} className="list-item">
+                <div 
+                  key={delivery._id} 
+                  className="list-item clickable-item"
+                  onClick={() => navigate(`/donations/${delivery.donation?._id}`)}
+                >
                   <div className="item-info">
                     <h4>{delivery.donation?.foodName || 'Food Items'}</h4>
                     <p>{delivery.allocatedServings} servings • {delivery.status.replace('_', ' ')}</p>
                   </div>
-                  <Link to={`/donations/${delivery.donation?._id}`} className="btn btn-ghost btn-sm">
+                  <div className="btn btn-ghost btn-sm">
                     View Map
-                  </Link>
+                  </div>
                 </div>
               ))}
             </div>
@@ -84,15 +91,9 @@ export default function ReceiverDashboard() {
           {requests.length === 0 ? (
             <p className="empty-text">You haven't posted any requests yet.</p>
           ) : (
-            <div className="active-list">
+            <div className="active-list grid-gap-small">
               {requests.slice(0, 5).map(req => (
-                <div key={req._id} className="list-item">
-                  <div className="item-info">
-                    <h4>{req.foodType.toUpperCase()} Food</h4>
-                    <p>{req.servingsNeeded} servings • {req.status}</p>
-                  </div>
-                  <div className={`status-badge ${req.status}`}>{req.status}</div>
-                </div>
+                <RequestCard key={req._id} request={req} />
               ))}
             </div>
           )}

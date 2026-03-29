@@ -6,6 +6,24 @@
   position: relative;
   overflow: hidden;
   animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.stats-card.clickable-stats {
+  cursor: pointer;
+  user-select: none;
+}
+
+.stats-card.clickable-stats:hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 
+    0 30px 60px -15px rgba(0, 0, 0, 0.4),
+    0 0 20px rgba(var(--primary-rgb), 0.1);
+}
+
+.stats-card.clickable-stats:active {
+  transform: translateY(-4px) scale(0.98);
 }
 
 .stats-card::before {

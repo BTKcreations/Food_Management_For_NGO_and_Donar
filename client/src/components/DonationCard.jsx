@@ -1,7 +1,17 @@
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import './DonationCard.css';
 
 export default function DonationCard({ donation, onClaim, showActions = true }) {
+  const navigate = useNavigate();
+
+  const handleCardClick = (e) => {
+    // Prevent navigation if clicking on an interactive button/element inside the card
+    if (e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.tagName === 'A' || e.target.closest('a')) {
+      return;
+    }
+    navigate(`/donations/${donation._id}`);
+  };
+
   const timeLeft = () => {
     const expires = new Date(donation.expiresAt);
     const now = new Date();
@@ -30,7 +40,10 @@ export default function DonationCard({ donation, onClaim, showActions = true }) 
   };
 
   return (
-    <div className={`donation-card glass-card ${isExpiringSoon() ? 'expiring-soon' : ''}`}>
+    <div 
+      className={`donation-card glass-card ${isExpiringSoon() ? 'expiring-soon' : ''} clickable-card`}
+      onClick={handleCardClick}
+    >
       <div className="donation-card-header">
         <div className="food-type-badge">
           <span className="food-icon">{foodTypeIcons[donation.foodType] || '🍽️'}</span>
@@ -96,18 +109,18 @@ export default function DonationCard({ donation, onClaim, showActions = true }) 
 
       {showActions && (
         <div className="donation-actions">
-          <Link to={`/donations/${donation._id}`} className="btn btn-ghost btn-sm">
+          <div className="btn btn-ghost btn-sm">
             View Details
-          </Link>
+          </div>
           
           {donation.status === 'in_transit' && (
-            <Link to={`/donations/${donation._id}`} className="btn btn-primary btn-sm" style={{ background: 'var(--accent)', borderColor: 'var(--accent)' }}>
+            <div className="btn btn-primary btn-sm" style={{ background: 'var(--accent)', borderColor: 'var(--accent)' }}>
               📡 Track Live
-            </Link>
+            </div>
           )}
 
           {donation.status === 'available' && onClaim && (
-            <button className="btn btn-primary btn-sm" onClick={() => onClaim(donation._id)}>
+            <button className="btn btn-primary btn-sm" onClick={(e) => { e.stopPropagation(); onClaim(donation._id); }}>
               Claim Food
             </button>
           )}

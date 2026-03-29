@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../utils/api';
+import RequestCard from '../components/RequestCard';
 import './Dashboard.css';
 
 export default function MyRequests() {
@@ -52,31 +53,11 @@ export default function MyRequests() {
       ) : (
         <div className="donations-grid">
           {requests.map(req => (
-            <div key={req._id} className="glass-card" style={{ padding: '1.25rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                <span className={`badge badge-${urgencyColors[req.urgency]}`}>{req.urgency} urgency</span>
-                <span className={`badge status-${req.status === 'open' ? 'available' : req.status}`}>{req.status}</span>
-              </div>
-              
-              <p style={{ fontSize: '0.9375rem', fontWeight: 600, marginBottom: '0.5rem' }}>
-                {req.servingsNeeded} servings of {req.foodType} food
-              </p>
-              <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
-                📍 {req.address}
-              </p>
-              <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                ⏰ Need by: {new Date(req.needByTime).toLocaleString()}
-              </p>
-              {req.description && (
-                <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>{req.description}</p>
-              )}
-
-              {req.status === 'open' && (
-                <button className="btn btn-ghost btn-sm" style={{ marginTop: '1rem' }} onClick={() => handleCancel(req._id)}>
-                  Cancel Request
-                </button>
-              )}
-            </div>
+            <RequestCard 
+              key={req._id} 
+              request={req} 
+              onCancel={handleCancel}
+            />
           ))}
         </div>
       )}

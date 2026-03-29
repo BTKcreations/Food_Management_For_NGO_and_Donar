@@ -4,12 +4,29 @@
   flex-direction: column;
   gap: 1rem;
   animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.donation-card.clickable-card {
+  cursor: pointer;
+  user-select: none;
+}
+
+.donation-card.clickable-card:hover {
+  transform: translateY(-10px) scale(1.02);
+  border-color: rgba(16, 185, 129, 0.4) !important;
+  box-shadow: 
+    0 40px 80px -20px rgba(0, 0, 0, 0.5),
+    0 0 30px rgba(16, 185, 129, 0.1);
+}
+
+.donation-card.clickable-card:active {
+  transform: translateY(-5px) scale(0.98);
 }
 
 .donation-card.expiring-soon {
   border-color: rgba(239, 68, 68, 0.3) !important;
   background: linear-gradient(135deg, var(--bg-card), rgba(239, 68, 68, 0.05));
-  box-shadow: 0 0 30px rgba(239, 68, 68, 0.1);
 }
 
 @keyframes pulse-danger {

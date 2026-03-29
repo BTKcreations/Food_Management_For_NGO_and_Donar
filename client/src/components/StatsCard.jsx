@@ -1,8 +1,13 @@
+import { useNavigate } from 'react-router-dom';
 import './StatsCard.css';
 
-export default function StatsCard({ icon, label, value, trend, color = 'primary' }) {
+export default function StatsCard({ icon, label, value, trend, color = 'primary', path }) {
+  const navigate = useNavigate();
   return (
-    <div className={`stats-card glass-card color-${color}`}>
+    <div 
+      className={`stats-card glass-card color-${color} ${path ? 'clickable-stats' : ''}`}
+      onClick={() => path && navigate(path)}
+    >
       <div className="stats-icon-wrapper">
         <span className="stats-icon">{icon}</span>
       </div>

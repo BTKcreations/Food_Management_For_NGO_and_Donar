@@ -103,10 +103,28 @@
   color: var(--text-primary);
 }
 
-/* Donations Grid */
 .donations-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.clickable-item {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+}
+
+.clickable-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(var(--primary-rgb), 0.2);
+  transform: translateX(5px);
+}
+
+.grid-gap-small {
+  display: grid;
   gap: 1rem;
 }
 
