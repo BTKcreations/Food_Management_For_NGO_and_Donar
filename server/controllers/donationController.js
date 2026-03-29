@@ -34,7 +34,7 @@ exports.createDonation = async (req, res) => {
       specialInstructions,
       safetyCertified,
       urgency: urgency || 'medium',
-      images: req.files ? req.files.map(f => `/uploads/${f.filename}`) : []
+      images: req.files ? req.files.map(f => f.path) : []
     });
 
     // Increment donor's total donations

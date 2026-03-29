@@ -229,7 +229,7 @@ exports.updateTransactionStatus = async (req, res) => {
       
       // Save delivery proof images if provided
       if (req.files && req.files.length > 0) {
-        transaction.deliveryImages = req.files.map(file => `/uploads/${file.filename}`);
+        transaction.deliveryImages = req.files.map(file => file.path);
       }
       
       // Update volunteer stats & Karma

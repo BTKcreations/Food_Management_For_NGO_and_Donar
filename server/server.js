@@ -2,6 +2,12 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const compression = require('compression');
+const morgan = require('morgan');
+const mongoSanitize = require('express-mongo-sanitize');
+const hpp = require('hpp');
 
 const connectDB = require('./config/db');
 
@@ -15,6 +21,32 @@ const analyticsRoutes = require('./routes/analytics');
 const userRoutes = require('./routes/users');
 
 const app = express();
+
+// 🛡️ 1. Security Headers (Helmet)
+app.use(helmet());
+
+// 🧪 2. Traffic Logging (Morgan)
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
+
+// 🚦 3. Rate Limiting (Prevent DDoS/Brute Force)
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per window
+  message: {
+    success: false,
+    message: 'Too many requests from this IP, please try again after 15 minutes'
+  }
+});
+app.use('/api', limiter);
+
+// 🚀 4. Performance (Compression)
+app.use(compression());
+
+// 🧹 5. Data Sanitization (NoSQL Injection & XSS)
+app.use(mongoSanitize());
+app.use(hpp()); // Prevent HTTP Parameter Pollution
 
 // Connect to MongoDB
 connectDB();
@@ -48,12 +80,16 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Error handling middleware
+// Global Error Handler
 app.use((err, req, res, next) => {
-  console.error('Server Error:', err);
-  res.status(err.statusCode || 500).json({
+  console.error('SERVER ERROR 🔥:', err);
+  
+  const statusCode = err.statusCode || 500;
+  res.status(statusCode).json({
     success: false,
-    message: err.message || 'Internal Server Error'
+    message: err.message || 'Internal Server Error',
+    // 🛡️ Hide stack trace in production
+    stack: process.env.NODE_ENV === 'production' ? null : err.stack
   });
 });
 
