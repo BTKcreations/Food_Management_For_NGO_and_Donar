@@ -212,8 +212,35 @@ export default function DonationDetails() {
           <p style={{ color: 'var(--text-main)', marginBottom: '1.5rem', lineHeight: 1.6 }}>{donation.description}</p>
         )}
 
-        {/* 📸 Food Photos (Donor Provided) */}
-        {donation.images?.length > 0 && (
+        {/* 📸 Food Items (Basket View) */}
+        {donation.items?.length > 0 ? (
+          <div style={{ marginBottom: '1.5rem' }}>
+            <h3 style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.75rem', color: 'var(--text-muted)' }}>🍱 Food Basket Items</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1rem' }}>
+              {donation.items.map((item, i) => (
+                <div key={i} className="glass-card" style={{ padding: '0.625rem', border: '1px solid var(--border-light)' }}>
+                  <img 
+                    src={item.image.startsWith('http') ? item.image : `${import.meta.env.VITE_IMAGE_BASE_URL || 'http://localhost:5000'}${item.image}`} 
+                    alt={item.name} 
+                    style={{ width: '100%', height: '110px', objectFit: 'cover', borderRadius: 'var(--radius-sm)' }} 
+                  />
+                  <p style={{ fontSize: '0.8125rem', fontWeight: 700, marginTop: '8px', marginBottom: '4px' }}>{item.name}</p>
+                  
+                  {item.preparedAt && (
+                    <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
+                      🍳 Prep: {new Date(item.preparedAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                    </p>
+                  )}
+                  {item.expiresAt && (
+                    <p style={{ fontSize: '0.65rem', color: new Date(item.expiresAt) < new Date() ? 'var(--danger)' : 'var(--text-muted)', fontWeight: new Date(item.expiresAt) < new Date() ? 700 : 400 }}>
+                      ⏳ Exp: {new Date(item.expiresAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : donation.images?.length > 0 && (
           <div style={{ marginBottom: '1.5rem' }}>
             <h3 style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.75rem', color: 'var(--text-muted)' }}>📸 Proof of Food (Donor)</h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '0.75rem' }}>

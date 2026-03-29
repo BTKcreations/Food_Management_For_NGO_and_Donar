@@ -14,9 +14,15 @@ export default function CreateDonation() {
     servings: '', preparedAt: '', expiresAt: '', address: user?.address || '',
     contactPhone: user?.phone || '', isVegetarian: false,
     latitude: 0, longitude: 0, specialInstructions: '',
-    safetyCertified: false, urgency: 'medium',
-    images: []
+    latitude: 0, longitude: 0, specialInstructions: '',
+    safetyCertified: false, urgency: 'medium'
   });
+  const [basket, setBasket] = useState([]);
+  const [currentItemName, setCurrentItemName] = useState('');
+  const [itemPrepAt, setItemPrepAt] = useState('');
+  const [itemExpAt, setItemExpAt] = useState('');
+  const [currentFile, setCurrentFile] = useState(null);
+  const [showItemForm, setShowItemForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -44,6 +50,25 @@ export default function CreateDonation() {
     }));
   };
 
+  const addToBasket = () => {
+    if (!currentItemName || !currentFile) return;
+    setBasket(prev => [...prev, { 
+      name: currentItemName, 
+      file: currentFile,
+      preparedAt: itemPrepAt,
+      expiresAt: itemExpAt
+    }]);
+    setCurrentItemName('');
+    setItemPrepAt('');
+    setItemExpAt('');
+    setCurrentFile(null);
+    setShowItemForm(false);
+  };
+
+  const removeFromBasket = (index) => {
+    setBasket(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleLocationChange = (lat, lng, addressFromMap) => {
     setFormData(prev => ({
       ...prev,
@@ -63,18 +88,31 @@ export default function CreateDonation() {
       return;
     }
 
-    setLoading(true);
+    if (basket.length === 0) {
+      setError('Please add at least one food item to your basket');
+      setLoading(false);
+      return;
+    }
 
     try {
       const data = new FormData();
+      
+      // Auto-generate collective food name if not provided or just use items
+      const collectiveName = basket.map(item => item.name).join(' + ');
+      
       Object.keys(formData).forEach(key => {
-        if (key === 'images') {
-          for (let i = 0; i < formData.images.length; i++) {
-            data.append('images', formData.images[i]);
-          }
-        } else {
-          data.append(key, formData[key]);
-        }
+        data.append(key, formData[key]);
+      });
+
+      // Override foodName with collective name if items exist
+      data.set('foodName', collectiveName);
+
+      // Append items
+      basket.forEach((item, index) => {
+        data.append('itemNames', item.name);
+        data.append('itemPreparedDates', item.preparedAt);
+        data.append('itemExpiresDates', item.expiresAt);
+        data.append('images', item.file);
       });
 
       await api.post('/donations', data, {
@@ -166,32 +204,87 @@ export default function CreateDonation() {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Food Photos</label>
+            <label className="form-label">🍲 Your Food Basket *</label>
             <div className="media-manager">
-              {formData.images.length > 0 && (
-                <div className="image-preview-grid">
-                  {Array.from(formData.images).map((file, i) => (
-                    <div key={i} className="preview-item">
-                      <img src={URL.createObjectURL(file)} alt="Preview" />
-                      <button type="button" className="preview-remove" onClick={() => removeImage(i)}>×</button>
+              {basket.length > 0 && (
+                <div className="image-preview-grid" style={{ marginBottom: '1.5rem' }}>
+                  {basket.map((item, i) => (
+                    <div key={i} className="preview-item" style={{ height: 'auto', width: '140px', borderStyle: 'solid' }}>
+                      <img src={URL.createObjectURL(item.file)} alt="Preview" style={{ height: '100px' }} />
+                      <div style={{ padding: '8px', background: 'var(--bg-secondary)', borderTop: '1px solid var(--border-light)' }}>
+                        <p style={{ fontSize: '0.75rem', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.name}</p>
+                      </div>
+                      <button type="button" className="preview-remove" onClick={() => removeFromBasket(i)}>×</button>
                     </div>
                   ))}
                 </div>
               )}
               
-              <div className="media-actions">
-                <label className="media-btn">
-                  <span>📸 Capture Photo</span>
-                  <input type="file" accept="image/*" capture="environment" onChange={handleChange} />
-                </label>
-                <label className="media-btn">
-                  <span>➕ Add Files</span>
-                  <input type="file" accept="image/*" multiple onChange={handleChange} />
-                </label>
-              </div>
+              {!showItemForm ? (
+                <button 
+                  type="button" 
+                  className="btn btn-secondary" 
+                  style={{ width: '100%', border: '2px dashed var(--border-light)', background: 'transparent' }}
+                  onClick={() => setShowItemForm(true)}
+                >
+                  ➕ Add Food Item
+                </button>
+              ) : (
+                <div className="glass-card" style={{ padding: '1.25rem', border: '1px solid var(--primary-light)', animation: 'slideDown 0.3s ease' }}>
+                  <h4 style={{ fontSize: '0.875rem', marginBottom: '1rem' }}>Step 1: Capture or Select Photo</h4>
+                  <div className="media-actions" style={{ marginBottom: '1rem' }}>
+                    <label className="media-btn" style={{ background: currentFile ? 'rgba(16, 185, 129, 0.1)' : '' }}>
+                      <span>{currentFile ? '📸 Image Ready' : '📸 Take Photo'}</span>
+                      <input type="file" accept="image/*" capture="environment" onChange={(e) => setCurrentFile(e.target.files[0])} />
+                    </label>
+                    <label className="media-btn">
+                      <span>📁 Select File</span>
+                      <input type="file" accept="image/*" onChange={(e) => setCurrentFile(e.target.files[0])} />
+                    </label>
+                  </div>
+
+                  {currentFile && (
+                    <div className="item-details animate-fade-in">
+                      <h4 style={{ fontSize: '0.875rem', marginBottom: '0.75rem' }}>Step 2: Enter Item Details</h4>
+                      
+                      <div className="form-group" style={{ marginBottom: '1rem' }}>
+                        <label className="form-label" style={{ fontSize: '0.75rem' }}>Small Item Name *</label>
+                        <input 
+                          type="text" 
+                          className="form-input" 
+                          placeholder="e.g. Tomato Soup, Biryani..." 
+                          value={currentItemName} 
+                          onChange={(e) => setCurrentItemName(e.target.value)} 
+                          autoFocus
+                        />
+                      </div>
+
+                      <div className="form-row" style={{ gap: '1rem', marginBottom: '1.5rem' }}>
+                        <div className="form-group" style={{ marginBottom: 0 }}>
+                          <label className="form-label" style={{ fontSize: '0.7rem' }}>Prep Time (Optional)</label>
+                          <input type="datetime-local" className="form-input" style={{ fontSize: '0.8125rem', padding: '8px' }} value={itemPrepAt} onChange={e => setItemPrepAt(e.target.value)} />
+                        </div>
+                        <div className="form-group" style={{ marginBottom: 0 }}>
+                          <label className="form-label" style={{ fontSize: '0.7rem' }}>Expiry Time (Optional)</label>
+                          <input type="datetime-local" className="form-input" style={{ fontSize: '0.8125rem', padding: '8px' }} value={itemExpAt} onChange={e => setItemExpAt(e.target.value)} />
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
+                        <button type="button" className="btn btn-primary" style={{ flex: 1, padding: '12px' }} onClick={addToBasket}>
+                          ✅ Add to Basket
+                        </button>
+                        <button type="button" className="btn btn-ghost" style={{ padding: '12px' }} onClick={() => { setShowItemForm(false); setCurrentFile(null); setCurrentItemName(''); setItemPrepAt(''); setItemExpAt(''); }}>
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '8px' }}>
-              Upload real photos to help with verification. You can add more photos one by one.
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '12px' }}>
+              Add each food item individually with its photo for faster NGO matching.
             </p>
           </div>
 

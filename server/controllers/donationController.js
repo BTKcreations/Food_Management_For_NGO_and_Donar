@@ -11,8 +11,27 @@ exports.createDonation = async (req, res) => {
       foodType, foodName, description, quantity, servings,
       preparedAt, expiresAt, address, contactPhone,
       latitude, longitude, isVegetarian, allergens, specialInstructions,
-      safetyCertified, urgency
+      safetyCertified, urgency, itemNames, itemPreparedDates, itemExpiresDates
     } = req.body;
+
+    // Handle items (name + image + dates mapping)
+    const items = [];
+    if (itemNames && req.files) {
+      const names = Array.isArray(itemNames) ? itemNames : [itemNames];
+      const prepDates = Array.isArray(itemPreparedDates) ? itemPreparedDates : [itemPreparedDates];
+      const expiryDates = Array.isArray(itemExpiresDates) ? itemExpiresDates : [itemExpiresDates];
+      
+      names.forEach((name, index) => {
+        if (req.files[index]) {
+          items.push({
+            name,
+            image: req.files[index].path,
+            preparedAt: prepDates[index] || null,
+            expiresAt: expiryDates[index] || null
+          });
+        }
+      });
+    }
 
     const donation = await Donation.create({
       donor: req.user._id,
@@ -34,7 +53,8 @@ exports.createDonation = async (req, res) => {
       specialInstructions,
       safetyCertified,
       urgency: urgency || 'medium',
-      images: req.files ? req.files.map(f => f.path) : []
+      images: req.files ? req.files.map(f => f.path) : [],
+      items: items
     });
 
     // Increment donor's total donations

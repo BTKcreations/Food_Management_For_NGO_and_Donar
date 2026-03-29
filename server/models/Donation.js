@@ -51,6 +51,12 @@ const donationSchema = new mongoose.Schema({
   images: [{
     type: String
   }],
+  items: [{
+    name: { type: String, required: true },
+    image: { type: String, required: true },
+    preparedAt: { type: Date },
+    expiresAt: { type: Date }
+  }],
   location: {
     type: {
       type: String,
