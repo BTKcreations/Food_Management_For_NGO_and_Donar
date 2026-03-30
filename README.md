@@ -1,37 +1,38 @@
-# FoodBridge 🌿 | Social Enterprise Logistics & Sustainability System
+# FoodBridge 🌿 | High-Efficiency Zero-Waste Logistics & Community Sustainability Platform
 
-**A powerful, real-time logistics engine connecting surplus food generators with those in need.**
+**Empowering communities by bridging the gap between surplus food generators and those in need through a resilient, role-based logistics network.**
 
-FoodBridge is more than a management tool — it's a "Social Enterprise" ecosystem. It transforms surplus food from hotels, restaurants, and event venues into survival resources for NGOs and local communities using an intelligent, role-based logistics network.
+FoodBridge is a "Social Enterprise" ecosystem designed to solve the critical problem of food waste in the hospitality sector. It transforms surplus food from hotels, restaurants, and corporate venues into survival resources for NGOs and local communities using an intelligent, real-time logistics engine.
 
 ---
 
-## 🚀 The Impact Engine (Key Features)
+## 🚀 The Impact Engine (Actual Implementation)
 
-### 📊 Sustainability Analytics (CSR Dashboard)
+### 📊 Multi-Dimensional CSR Analytics
 Every action on FoodBridge contributes to a greener planet. Our **Mission Control Dashboard** calculates real-time Corporate Social Responsibility (CSR) metrics:
-- **CO2 Offset**: Automatically calculates environmental impact based on food weight salvaged.
+- **CO2 Offset**: Automatically calculates environmental impact based on food weight salvaged (Preventing Landfill Methane).
 - **Meals Provided**: Real-time counter of community impact.
-- **Volunteer Karma**: A gamified reputation system rewarding volunteers for successful deliveries.
+- **Volunteer Karma**: A gamified reputation system rewarding volunteers with +10 points for every successful mission.
 
-### ☀️ Universal Theme Engine 2.0
-A premium user experience with multi-mode transition support:
-- **Dark Mode**: Optimized for low-light "Mission Control" monitoring.
-- **Light Mode**: High-contrast, professional "Social Enterprise" aesthetic.
-- **System Sync**: Automatically adapts to your OS settings for a seamless feel.
+### 📍 Precision Logistics & Zomato-Style Tracking
+- **Interactive Leaflet Integration**: High-precision location selection for Donors and Receivers.
+- **Live Mission Tracking**: NGOs can monitor volunteer movement in real-time during "In-Transit" missions.
+- **Geofencing**: Automatic nearby notifications for NGOs and Volunteers when new food becomes available.
 
-### ⚡ Intelligence Expiry Engine (Urgency Tracking)
-Donations aren't just listed — they are prioritized.
-- **Flash-Discovery**: Items expiring in <3 hours pulse red with an **URGENT** warning.
-- **Smart Sorting**: The system prioritizes the most critical food items to ensure zero-waste.
+### 🛡️ Secure Handoff Protocol (OTP Verification)
+Safety and accountability are enforced through a unique **Two-Factor Verification** system:
+- **Pickup Code**: Donors provide a 4-digit code to the volunteer to authorize food collection.
+- **Delivery Code**: Receivers provide a 4-digit code to the volunteer to finalize the mission.
+- **Digital Proof**: Volunteers capture and upload "Proof of Distribution" photos directly to the transaction log.
 
-### 📍 Precision Logistics & Tracking
-- **Interactive Mapbox Integration**: Real-time location picking and delivery tracking.
-- **Secure Handoff**: Verified organization badges and organization verification systems.
+### ⚡ Intelligence Expiry Engine (Flash-Discovery)
+Donations aren't just listed — they are prioritized based on safety and freshness.
+- **Urgency Thresholds**: Items expiring in <3 hours are flagged as **CRITICAL**.
+- **Smart Sorting**: The system automatically surfaces urgent items to the top of the NGO and Volunteer feeds.
 
 ---
 
-## 🔄 The Lifecycle Workflow (Donation Journey)
+## 🔄 The Logistics Lifecycle
 
 ```mermaid
 graph TD
@@ -40,49 +41,40 @@ graph TD
     B -->|Stable| D[Standard Listing]
     C --> E[NGO Browse & Claim]
     D --> E
-    E --> F[Volunteer: Delivery Market]
+    E --> F[Volunteer: Mission Market]
     F --> G[Volunteer: Accept & Navigate]
-    G --> H[Pick-up & Verification]
-    H --> I[Safe Delivery & Validation]
+    G --> H[Pick-up & OTP Verification]
+    H --> I[Safe Delivery & Proof Upload]
     I --> J[Impact Logged: CO2 Offset + Meals + Karma]
 ```
 
 ---
 
-## 👤 Role-Based Mission Control
+## 👤 Unified Role Ecosystem
 
 | Role | Mission | Primary Dashboard |
 | :--- | :--- | :--- |
-| **Donor** | Community Contribution | **My Recent Impact**: Impact metrics & Donation History. |
-| **NGO** | Community Support | **Claim Hub**: Active Claims, Expiring Food Radar. |
-| **Volunteer** | Logistics Champion | **Mission Hub**: Active Deliveries, Karma Points, Delivery Market. |
-| **Admin** | Platform Optimizer | **Control Center**: User Verification, Global Analytics. |
+| **Donor** | Community Contribution | **Impact Hub**: CSR metrics, CO2 offset, & Donation History. |
+| **NGO** | Community Support | **Claim Radar**: Active Claims, Warehouse Management, Receiver Matching. |
+| **Volunteer** | Logistics Champion | **Mission Hub**: Active Deliveries, Karma Points, Live Tracking. |
+| **Receiver** | Direct Beneficiary | **Requirement Hub**: Food Requests, Delivery Tracking. |
+| **Admin** | Platform Optimizer | **Control Center**: User Verification, Global Analytics, System Health. |
 
 ---
 
-## 🛠️ Technical Architecture
+## 🛠️ Technical Blueprint
 
 ### Core Tech Stack
-- **Frontend**: React.js (Vite) + Context API for Global Theme/Auth logic.
+- **Frontend**: React.js (Vite) + Context API for Global State (Auth, Theme, Notifications).
 - **Backend**: Node.js + Express.js + Mongoose (MongoDB).
-- **Interactive**: Mapbox GL JS for logistics and real-time tracking.
-- **Performance**: Zero-Layout-Shift design with Shimmer-based **Skeleton Loading**.
-
-### Key Infrastructure
-- **Real-time Notifications**: Custom event-driven notification engine.
-- **Reputation System**: Model-level karma incrementation for verified actions.
-- **Design Tokens**: Centralized CSS variables for "Theme 2.0" support.
+- **Mapping**: Leaflet.js (UI MapPicker) & Mapbox GL JS (Mission Tracking).
+- **Security**: JWT-based Authentication with Role-Based Access Control (RBAC).
 
 ---
 
-## 🏁 Getting Started (Developer Setup)
+## 🏁 Quick-Start Guide
 
-### 1. Prerequisites
-- **Node.js**: 18+
-- **MongoDB**: Local instance or Atlas URI
-- **Mapbox API Token**: For interactive maps
-
-### 2. Installations
+### 1. Installations
 ```bash
 # Clone the FoodBridge ecosystem
 git clone <repository-url>
@@ -94,16 +86,7 @@ cd server && npm install
 cd ../client && npm install
 ```
 
-### 3. Environment Configuration (`.env`)
-Create a `.env` in the `/server` directory:
-```env
-PORT=5000
-MONGODB_URI=your_mongodb_connection_string
-JWT_SECRET=your_secure_secret_key
-MAPBOX_ACCESS_TOKEN=your_mapbox_token
-```
-
-### 4. Launching the Platform
+### 2. Launching the Platform
 ```bash
 # Terminal 1: Mission Control (Backend)
 cd server && node server.js
@@ -114,5 +97,9 @@ cd client && npm run dev
 
 ---
 
-## 📄 Platform Credits
+## 📄 Documentation
+For a deep dive into the project's technical implementation, database schema, and CSR formulas, refer to [DOCUMENTATION.md](./DOCUMENTATION.md).
+
+---
+
 *Built with ❤️ for the 2026 Academic Major Program — Towards a Zero-Waste Future.*
