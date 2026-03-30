@@ -115,7 +115,7 @@ export default function DonationDetails() {
     e.preventDefault();
     try {
       await api.put(`/donations/${id}/claim`, claimData);
-      setMessage(`${claimData.claimQuantity} servings claimed successfully!`);
+      setMessage(`${claimData.claimQuantity} unit(s) claimed successfully!`);
       setShowClaimModal(false);
       fetchDonation();
     } catch (err) {
@@ -286,12 +286,20 @@ export default function DonationDetails() {
         {/* Details grid */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
           <div className="glass-card" style={{ padding: '1rem' }}>
-            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Original Quantity</p>
-            <p style={{ fontWeight: 600 }}>{donation.servings} servings</p>
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Donation Quantity</p>
+            <p style={{ fontWeight: 600 }}>{donation.quantity || 'Unspecified'}</p>
           </div>
-          <div className="glass-card" style={{ padding: '1rem', border: '1px solid var(--primary)' }}>
-            <p style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 700, marginBottom: '4px' }}>Remaining Bulk</p>
-            <p style={{ fontWeight: 800, fontSize: '1.25rem' }}>{donation.remainingServings} servings</p>
+          {donation.servings > 0 && (
+            <div className="glass-card" style={{ padding: '1rem' }}>
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Estimated Servings</p>
+              <p style={{ fontWeight: 600 }}>{donation.servings} servings</p>
+            </div>
+          )}
+          <div className="glass-card" style={{ padding: '1rem', border: '1px solid var(--primary)', gridColumn: donation.servings > 0 ? 'span 1' : 'span 2' }}>
+            <p style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 700, marginBottom: '4px' }}>Remaining Portion</p>
+            <p style={{ fontWeight: 800, fontSize: '1.25rem' }}>
+              {donation.remainingServings > 0 ? `${donation.remainingServings} servings` : donation.quantity || 'Available'}
+            </p>
           </div>
           <div className="glass-card" style={{ padding: '1rem' }}>
             <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Prepared At</p>
@@ -501,11 +509,11 @@ export default function DonationDetails() {
                 <h2 style={{ marginBottom: '1rem' }}>Smart Redistribution</h2>
                 <form onSubmit={handleClaimSubmit}>
                   <div className="form-group">
-                    <label className="form-label">How many servings to claim? (Max {donation.remainingServings})</label>
+                    <label className="form-label">How much to claim? (Max {donation.remainingServings || '1 batch'})</label>
                     <input 
                       type="number" 
                       className="form-input" 
-                      max={donation.remainingServings} 
+                      max={donation.remainingServings || 1} 
                       min="1" 
                       value={claimData.claimQuantity}
                       onChange={(e) => setClaimData({...claimData, claimQuantity: e.target.value})}

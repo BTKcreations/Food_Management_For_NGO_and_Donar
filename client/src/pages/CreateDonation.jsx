@@ -89,20 +89,32 @@ export default function CreateDonation() {
     try {
       const data = new FormData();
       
-      const collectiveName = basket.map(item => item.name).join(' + ');
+      // Auto-generate collective name and total quantity from basket
+      const itemNames = basket.map(item => item.name);
+      const collectiveName = itemNames.length > 3 
+        ? `${itemNames.slice(0, 3).join(', ')} + ${itemNames.length - 3} more`
+        : itemNames.join(' + ');
+
+      // Also auto-suggest overall quantity if left blank
+      const totalItemsQuantity = basket.length === 1 
+        ? (basket[0].quantityOrWeight || '1 item')
+        : `${basket.length} items (${itemNames.slice(0, 2).join(', ')}...)`;
       
       Object.keys(formData).forEach(key => {
         data.append(key, formData[key]);
       });
 
       data.set('foodName', collectiveName);
+      if (!formData.quantity) {
+        data.set('quantity', totalItemsQuantity);
+      }
 
       basket.forEach((item, index) => {
         data.append('itemNames', item.name);
-        data.append('itemPreparedDates', item.preparedAt);
-        data.append('itemExpiresDates', item.expiresAt);
-        data.append('itemQuantities', item.quantityOrWeight);
-        data.append('itemServings', item.servings);
+        data.append('itemPreparedDates', item.preparedAt || formData.preparedAt);
+        data.append('itemExpiresDates', item.expiresAt || formData.expiresAt);
+        data.append('itemQuantities', item.quantityOrWeight || '1 unit');
+        data.append('itemServings', item.servings || 0);
         data.append('images', item.file);
       });
 

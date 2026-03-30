@@ -62,7 +62,7 @@ export default function WarehouseManager() {
                 <tr>
                   <th>Food Item</th>
                   <th>Type</th>
-                  <th>Quantity (Servings)</th>
+                  <th>Quantity</th>
                   <th>Expiry</th>
                   <th>Status</th>
                   <th>Action</th>

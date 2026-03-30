@@ -69,43 +69,58 @@ export default function DonationCard({ donation, onClaim, showActions = true }) 
         </div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-        <h3 className="donation-food-name" style={{ marginBottom: 0 }}>{donation.foodName}</h3>
-        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', background: 'var(--bg-tertiary)', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>
+      <div className="donation-card-info-row">
+        <h3 className="donation-food-name">{donation.foodName}</h3>
+        <span className="source-tag">
           {sourceDetails[donation.source]?.icon || '🍽️'} {sourceDetails[donation.source]?.label || 'Other'}
         </span>
       </div>
       
+      {/* 🧺 BASKET SUMMARY (New Section) */}
+      {donation.items?.length > 0 && (
+        <div className="basket-summary">
+          <span className="basket-label">Basket:</span>
+          <div className="basket-items-list">
+            {donation.items.slice(0, 2).map((item, i) => (
+              <span key={i} className="basket-item-tag">{item.name}</span>
+            ))}
+            {donation.items.length > 2 && (
+              <span className="basket-item-tag more">+{donation.items.length - 2} more</span>
+            )}
+          </div>
+        </div>
+      )}
+
       {donation.description && (
         <p className="donation-description">{donation.description}</p>
       )}
 
       <div className="donation-meta">
-        <div className="meta-item">
-          <span className="meta-icon">👥</span>
-          <span>{donation.servings} servings</span>
-        </div>
-        <div className="meta-item">
-          <span className="meta-icon">📦</span>
-          <span>{donation.quantity}</span>
-        </div>
-        <div className="meta-item">
-          <span className="meta-icon">⏰</span>
-          <span className={isExpiringSoon() ? 'text-danger' : ''} style={isExpiringSoon() ? { fontWeight: 800, animation: 'pulse-danger 2s infinite' } : {}}>
-            {isExpiringSoon() ? '⚡ URGENT: ' : ''}{timeLeft()}
-          </span>
-        </div>
-        {donation.isVegetarian && (
-          <div className="meta-item veg-badge">
-            <span className="meta-icon">🟢</span>
-            <span>Veg</span>
+        <div className="meta-row">
+          <div className="meta-item">
+            <span className="meta-icon">📦</span>
+            <span className="meta-text">{donation.quantity || 'Unspecified'}</span>
           </div>
-        )}
-      </div>
-
-      <div className="donation-location">
-        <span className="meta-icon">📍</span>
-        <span>{donation.address}</span>
+          <div className="meta-item">
+            <span className="meta-icon">⏰</span>
+            <span className={`meta-text ${isExpiringSoon() ? 'text-urgent' : ''}`}>
+              {timeLeft()}
+            </span>
+          </div>
+        </div>
+        
+        <div className="meta-row secondary">
+          <div className="meta-item location">
+            <span className="meta-icon">📍</span>
+            <span className="meta-text">{donation.address}</span>
+          </div>
+          {donation.isVegetarian && (
+            <div className="meta-item veg-indicator">
+              <span className="veg-dot"></span>
+              <span className="meta-text">Veg</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {donation.donor && (

@@ -92,7 +92,7 @@ export default function Transactions() {
                     <strong>{t.donation?.foodName || 'N/A'}</strong>
                     <br />
                     <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                      {t.donation?.servings} servings
+                      {t.donation?.quantity || `${t.donation?.servings} servings`}
                     </span>
                   </td>
                   <td>{t.donor?.name || 'N/A'}</td>
