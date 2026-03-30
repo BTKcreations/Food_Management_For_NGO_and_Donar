@@ -9,7 +9,7 @@ const donationSchema = new mongoose.Schema({
   foodType: {
     type: String,
     enum: ['cooked', 'raw', 'packaged', 'beverages', 'bakery', 'fruits_vegetables', 'other'],
-    required: [true, 'Food type is required']
+    default: 'other'
   },
   source: {
     type: String,
@@ -28,12 +28,12 @@ const donationSchema = new mongoose.Schema({
   },
   quantity: {
     type: String,
-    required: [true, 'Quantity is required']
+    default: 'Unspecified'
   },
   servings: {
     type: Number,
-    required: [true, 'Estimated servings is required'],
-    min: 1
+    default: 0,
+    min: 0
   },
   remainingServings: {
     type: Number,

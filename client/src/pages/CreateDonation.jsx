@@ -211,10 +211,7 @@ export default function CreateDonation() {
                             <label className="form-label" style={{ fontSize: '0.75rem' }}>Qty / Weight</label>
                             <input type="text" className="form-input" placeholder="e.g. 2 kg, 1 box" value={itemQuantity} onChange={e => setItemQuantity(e.target.value)} />
                           </div>
-                          <div className="form-group" style={{ marginBottom: 0 }}>
-                            <label className="form-label" style={{ fontSize: '0.75rem' }}>Servings</label>
-                            <input type="number" className="form-input" placeholder="0" value={itemServings} onChange={e => setItemServings(e.target.value)} />
-                          </div>
+
                         </div>
 
                         <div className="form-row" style={{ gap: '0.75rem', marginBottom: '1.5rem' }}>
@@ -249,18 +246,7 @@ export default function CreateDonation() {
           </p>
 
           <div className="form-row">
-            <div className="form-group">
-              <label className="form-label" htmlFor="foodType">Collective Food Category *</label>
-              <select id="foodType" name="foodType" className="form-select" value={formData.foodType} onChange={handleChange}>
-                <option value="cooked">🍛 Cooked Food</option>
-                <option value="raw">🥬 Raw Ingredients</option>
-                <option value="packaged">📦 Packaged Food</option>
-                <option value="beverages">🥤 Beverages</option>
-                <option value="bakery">🍞 Bakery Items</option>
-                <option value="fruits_vegetables">🍎 Fruits & Vegetables</option>
-                <option value="other">🍽️ Other</option>
-              </select>
-            </div>
+
             <div className="form-group">
               <label className="form-label" htmlFor="urgency">Urgency Level</label>
               <select id="urgency" name="urgency" className="form-select" value={formData.urgency} onChange={handleChange}>

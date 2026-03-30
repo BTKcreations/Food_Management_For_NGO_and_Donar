@@ -59,6 +59,49 @@ export default function Register() {
             <p>Join the fight against food waste and hunger</p>
           </div>
 
+          <div className="role-selector-container animate-fade-in" style={{ marginBottom: '2.5rem' }}>
+            <label className="form-label" style={{ textAlign: 'center', fontSize: '1rem', marginBottom: '1.25rem', color: 'var(--primary)', fontWeight: 700 }}>
+              🛡️ Select Your Account Type First
+            </label>
+            <div className="role-grid">
+              <div 
+                className={`role-card ${formData.role === 'donor' ? 'active' : ''}`}
+                onClick={() => setFormData(prev => ({ ...prev, role: 'donor' }))}
+              >
+                <div className="role-icon">🏪</div>
+                <div className="role-info">
+                  <h3>Food Donor</h3>
+                  <p>Hotels, Restaurants, & Households</p>
+                </div>
+                <div className="role-check">✓</div>
+              </div>
+
+              <div 
+                className={`role-card ${formData.role === 'ngo' ? 'active' : ''}`}
+                onClick={() => setFormData(prev => ({ ...prev, role: 'ngo' }))}
+              >
+                <div className="role-icon">🏢</div>
+                <div className="role-info">
+                  <h3>NGO / Food Bank</h3>
+                  <p>Distribution & Logistics Management</p>
+                </div>
+                <div className="role-check">✓</div>
+              </div>
+
+              <div 
+                className={`role-card ${formData.role === 'receiver' ? 'active' : ''}`}
+                onClick={() => setFormData(prev => ({ ...prev, role: 'receiver' }))}
+              >
+                <div className="role-icon">🏠</div>
+                <div className="role-info">
+                  <h3>Receiver</h3>
+                  <p>Shelters & Community Kitchens</p>
+                </div>
+                <div className="role-check">✓</div>
+              </div>
+            </div>
+          </div>
+
           {error && <div className="alert alert-error">{error}</div>}
 
           <form onSubmit={handleSubmit} className="auth-form">
@@ -88,14 +131,6 @@ export default function Register() {
               <div className="form-group">
                 <label className="form-label" htmlFor="phone">Phone Number *</label>
                 <input id="phone" type="tel" name="phone" className="form-input" placeholder="10-digit number" value={formData.phone} onChange={handleChange} required />
-              </div>
-              <div className="form-group">
-                <label className="form-label" htmlFor="role">I want to join as *</label>
-                <select id="role" name="role" className="form-select" value={formData.role} onChange={handleChange}>
-                  <option value="donor">🏪 Food Donor</option>
-                  <option value="ngo">🏢 NGO / Food Bank</option>
-                  <option value="receiver">🏠 Receiver / Community Kitchen</option>
-                </select>
               </div>
             </div>
 
