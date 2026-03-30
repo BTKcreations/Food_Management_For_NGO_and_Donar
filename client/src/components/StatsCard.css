@@ -117,3 +117,41 @@
   background: rgba(239, 68, 68, 0.15);
   color: var(--danger);
 }
+
+/* ========== MOBILE OPTIMIZATIONS ========== */
+@media (max-width: 640px) {
+  .stats-card {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem;
+    gap: 0.75rem;
+  }
+
+  .stats-icon-wrapper {
+    width: 36px;
+    height: 36px;
+    font-size: 1.125rem;
+    border-radius: 8px;
+  }
+
+  .stats-value {
+    font-size: 1.375rem;
+  }
+
+  .stats-label {
+    font-size: 0.75rem;
+    margin-top: 2px;
+    line-height: 1.2;
+    /* Ensure long labels wrap correctly if still too long */
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  .stats-trend {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 0.625rem;
+    padding: 2px 6px;
+  }
+}

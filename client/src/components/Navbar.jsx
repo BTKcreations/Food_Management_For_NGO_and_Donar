@@ -85,8 +85,6 @@ export default function Navbar() {
         { path: '/donations', label: 'Browse Food', icon: '🔍' },
         { path: '/requests', label: 'Community Needs', icon: '🤝' },
         { path: '/warehouse', label: 'Warehouse', icon: '🏭' },
-        { path: '/requests/create', label: 'New Request', icon: '📋' },
-        { path: '/my-requests', label: 'My Requests', icon: '📝' },
         { path: '/transactions', label: 'My Deliveries', icon: '🚚' }
       );
     }

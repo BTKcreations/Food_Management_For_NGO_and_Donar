@@ -79,9 +79,9 @@ export default function Dashboard() {
     if (user.role === 'ngo') {
       return [
         { icon: '📦', label: 'Claimed Donations', value: analytics.claimedDonations || 0, color: 'primary', path: '/donations' },
-        { icon: '📋', label: 'My Requests', value: analytics.myRequests || 0, color: 'info', path: '/my-requests' },
-        { icon: '✅', label: 'Fulfilled Requests', value: analytics.fulfilledRequests || 0, color: 'warning', path: '/my-requests' },
-        { icon: '🍽️', label: 'Total Received', value: analytics.totalReceived || 0, color: 'accent', path: '/donations' }
+        { icon: '🏭', label: 'Warehouse Items', value: analytics.inventoryCount || 0, color: 'info', path: '/warehouse' },
+        { icon: '🚚', label: 'My Deliveries', value: analytics.myDeliveries || 0, color: 'warning', path: '/transactions' },
+        { icon: '🍽️', label: 'Total Distributed', value: analytics.totalReceived || 0, color: 'accent', path: '/donations' }
       ];
     }
 
@@ -100,8 +100,8 @@ export default function Dashboard() {
     if (user.role === 'ngo') {
       return [
         { label: 'Browse Food', icon: '🔍', path: '/donations', color: 'primary' },
-        { label: 'Create Request', icon: '📋', path: '/requests/create', color: 'warning' },
-        { label: 'My Requests', icon: '📝', path: '/my-requests', color: 'info' }
+        { label: 'My Deliveries', icon: '🚚', path: '/transactions', color: 'info' },
+        { label: 'Warehouse', icon: '🏭', path: '/warehouse', color: 'warning' }
       ];
     }
     if (user.role === 'admin') {
