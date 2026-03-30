@@ -298,7 +298,8 @@ exports.updateTransactionStatus = async (req, res) => {
         title: '✅ Mission Accomplished!',
         message: `Your donation of ${transaction.donation?.foodName} was delivered successfully.`,
         relatedDonation: transaction.donation?._id,
-        relatedTransaction: transaction._id
+        relatedTransaction: transaction._id,
+        images: transaction.deliveryImages || []
       });
       // Notify NGO
       notifs.push({
@@ -348,7 +349,8 @@ exports.updateTransactionStatus = async (req, res) => {
         title: donorTitle,
         message: donorMsg,
         relatedDonation: transaction.donation?._id,
-        relatedTransaction: transaction._id
+        relatedTransaction: transaction._id,
+        images: transaction.deliveryImages || []
       });
     }
     if (receiverTitle && transaction.receiver) {

@@ -48,6 +48,9 @@ const notificationSchema = new mongoose.Schema({
     ref: 'Transaction',
     default: null
   },
+  images: [{
+    type: String
+  }],
   isRead: {
     type: Boolean,
     default: false

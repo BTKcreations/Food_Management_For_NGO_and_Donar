@@ -110,6 +110,20 @@ export default function Notifications() {
                 >
                   <div className="notif-full-title">{n.title} {!n.isRead && <span className="notif-new-tag">NEW</span>}</div>
                   <p className="notif-full-message">{n.message}</p>
+                  
+                  {n.images && n.images.length > 0 && (
+                    <div className="notif-gallery" style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+                      {n.images.map((img, i) => (
+                        <img 
+                          key={i} 
+                          src={img.startsWith('http') ? img : `${import.meta.env.VITE_IMAGE_BASE_URL || 'http://localhost:5000'}${img}`} 
+                          alt="Proof" 
+                          style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--border-light)' }} 
+                        />
+                      ))}
+                    </div>
+                  )}
+
                   <div className="notif-full-meta">
                     {new Date(n.createdAt).toLocaleString()}
                   </div>
