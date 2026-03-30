@@ -86,7 +86,8 @@ export default function Navbar() {
         { path: '/requests', label: 'Community Needs', icon: '🤝' },
         { path: '/warehouse', label: 'Warehouse', icon: '🏭' },
         { path: '/requests/create', label: 'New Request', icon: '📋' },
-        { path: '/my-requests', label: 'My Requests', icon: '📝' }
+        { path: '/my-requests', label: 'My Requests', icon: '📝' },
+        { path: '/transactions', label: 'My Deliveries', icon: '🚚' }
       );
     }
 
@@ -95,15 +96,6 @@ export default function Navbar() {
         { path: '/receiver-dashboard', label: 'My Needs', icon: '🍽️' },
         { path: '/requests/create', label: 'Request Food', icon: '➕' },
         { path: '/my-requests', label: 'Need History', icon: '📝' }
-      );
-    }
-
-    if (user.role === 'volunteer') {
-      links.push(
-        { path: '/donations', label: 'Browse Food', icon: '🔍' },
-        { path: '/requests', label: 'Community Needs', icon: '🤝' },
-        { path: '/volunteer-market', label: 'Delivery Market', icon: '📦' },
-        { path: '/my-deliveries', label: 'My Deliveries', icon: '🚗' }
       );
     }
 
@@ -116,7 +108,9 @@ export default function Navbar() {
       );
     }
 
-    links.push({ path: '/transactions', label: 'Transactions', icon: '🔄' });
+    if (!links.some(l => l.path === '/transactions')) {
+      links.push({ path: '/transactions', label: 'Transactions', icon: '🔄' });
+    }
 
     return links;
   };

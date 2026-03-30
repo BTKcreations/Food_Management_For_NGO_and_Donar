@@ -30,7 +30,8 @@ export default function Analytics() {
     return <div className="dashboard-page"><div className="empty-state"><p className="empty-state-title">Unable to load analytics</p></div></div>;
   }
 
-  const { overview, donationsByType, topDonors, topVolunteers, statusDistribution } = data;
+  const { overview, donationsByType, topDonors, statusDistribution } = data;
+ Broadway: 
 
   return (
     <div className="dashboard-page">
@@ -51,7 +52,6 @@ export default function Analytics() {
         <StatsCard icon="👤" label="Total Users" value={overview.totalUsers} color="info" />
         <StatsCard icon="🏪" label="Donors" value={overview.totalDonors} color="primary" />
         <StatsCard icon="🏛️" label="NGOs" value={overview.totalNGOs} color="warning" />
-        <StatsCard icon="🙋" label="Volunteers" value={overview.totalVolunteers} color="accent" />
       </div>
 
       {/* Charts Section */}
@@ -133,25 +133,6 @@ export default function Analytics() {
           )}
         </div>
 
-        {/* Top Volunteers */}
-        <div className="glass-card" style={{ padding: '1.5rem' }}>
-          <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '1.25rem' }}>🌟 Top Volunteers</h3>
-          {topVolunteers?.length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {topVolunteers.map((vol, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <span style={{ fontSize: '1.25rem' }}>{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}</span>
-                    <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>{vol.name}</span>
-                  </div>
-                  <span className="badge badge-info">{vol.totalDeliveries} deliveries</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>No volunteers yet</p>
-          )}
-        </div>
       </div>
 
       {/* Additional request stats */}

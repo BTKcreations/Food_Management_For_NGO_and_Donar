@@ -66,7 +66,7 @@ export default function DonationDetails() {
     let watchId = null;
     let heartbeatInterval = null;
 
-    if (user?.role === 'volunteer' && transaction?.status === 'in_transit') {
+    if (user?.role === 'ngo' && transaction?.status === 'in_transit') {
       if ("geolocation" in navigator) {
         watchId = navigator.geolocation.watchPosition(
           (pos) => {
@@ -95,7 +95,7 @@ export default function DonationDetails() {
     }
 
     let observerInterval = null;
-    if (user?.role !== 'volunteer' && transaction?.status === 'in_transit') {
+    if (user?.role !== 'ngo' && transaction?.status === 'in_transit') {
       observerInterval = setInterval(async () => {
         try {
           const transRes = await api.get(`/transactions/${transaction._id}`);
@@ -164,6 +164,16 @@ export default function DonationDetails() {
     bakery: '🍞', fruits_vegetables: '🍎', other: '🍽️'
   };
 
+  const sourceIcons = {
+    restaurant: '🍴 Restaurant', 
+    hotel: '🏨 Hotel / Banquet', 
+    marriage_event: '💍 Marriage / Wedding', 
+    corporate_event: '🏢 Corporate Event', 
+    household: '🏠 Household / Individual', 
+    canteen: '🏫 Canteen / Mess', 
+    other: '🍽️ Other'
+  };
+
   if (loading) {
     return <div className="dashboard-page"><div className="loading-container"><div className="spinner"></div></div></div>;
   }
@@ -182,7 +192,7 @@ export default function DonationDetails() {
 
   const isExpired = new Date(donation.expiresAt) < new Date();
   const isOwner = donation.donor?._id === user?.id;
-  const canClaim = ['ngo', 'volunteer', 'admin'].includes(user?.role) && donation.status === 'available' && !isExpired;
+  const canClaim = ['ngo', 'admin'].includes(user?.role) && donation.status === 'available' && !isExpired;
 
   return (
     <div className="dashboard-page">
@@ -202,10 +212,18 @@ export default function DonationDetails() {
             <span className={`badge status-${donation.status}`} style={{ fontSize: '0.8125rem', padding: '6px 14px' }}>
               {donation.status?.replace('_', ' ')}
             </span>
+            <span className="badge badge-secondary" style={{ fontSize: '0.8125rem', padding: '6px 14px', marginLeft: '8px' }}>
+              {sourceIcons[donation.source] || '🍽️ Other'}
+            </span>
           </div>
-          {donation.isVegetarian && (
-            <span className="badge badge-success" style={{ fontSize: '0.8125rem' }}>🟢 Vegetarian</span>
-          )}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+            {donation.isVegetarian && (
+              <span className="badge badge-success" style={{ fontSize: '0.8125rem' }}>🟢 Vegetarian</span>
+            )}
+            <span className={`badge urgency-${donation.urgency}`} style={{ fontSize: '0.75rem' }}>
+              {donation.urgency === 'high' ? '🔴 High Urgency' : donation.urgency === 'medium' ? '🟠 Medium Urgency' : '🟡 Low Urgency'}
+            </span>
+          </div>
         </div>
 
         {donation.description && (
@@ -318,7 +336,7 @@ export default function DonationDetails() {
               }}
               height="400px"
             />
-            {user?.role === 'volunteer' && (
+            {user?.role === 'ngo' && (
               <a 
                 href={`https://www.google.com/maps/dir/?api=1&destination=${donation.location.coordinates[1]},${donation.location.coordinates[0]}`} 
                 target="_blank" 
@@ -373,7 +391,7 @@ export default function DonationDetails() {
             )}
 
             {/* Show Verification Input for Volunteer */}
-            {user?.id === transaction.volunteer?._id && (transaction.status === 'accepted' || transaction.status === 'in_transit') && (
+            {user?.id === transaction.ngo?._id && (transaction.status === 'accepted' || transaction.status === 'in_transit') && (
               <div className="glass-card" style={{ padding: '1.5rem', border: '1px solid var(--primary)' }}>
                 <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '1rem' }}>🛡️ Verify Handoff</h3>
                 <p style={{ fontSize: '0.875rem', marginBottom: '1rem' }}>

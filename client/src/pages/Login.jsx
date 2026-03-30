@@ -73,6 +73,7 @@ export default function Login() {
                 placeholder="Enter your password"
                 value={formData.password}
                 onChange={handleChange}
+                autoComplete="current-password"
                 required
               />
             </div>

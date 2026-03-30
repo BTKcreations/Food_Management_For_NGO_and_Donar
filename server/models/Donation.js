@@ -11,6 +11,11 @@ const donationSchema = new mongoose.Schema({
     enum: ['cooked', 'raw', 'packaged', 'beverages', 'bakery', 'fruits_vegetables', 'other'],
     required: [true, 'Food type is required']
   },
+  source: {
+    type: String,
+    enum: ['restaurant', 'hotel', 'marriage_event', 'corporate_event', 'household', 'canteen', 'other'],
+    default: 'other'
+  },
   foodName: {
     type: String,
     required: [true, 'Food name is required'],
@@ -89,13 +94,13 @@ const donationSchema = new mongoose.Schema({
     ref: 'User',
     default: null
   },
-  claimedAt: {
-    type: Date,
-    default: null
-  },
   assignedVolunteer: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
+    default: null
+  },
+  claimedAt: {
+    type: Date,
     default: null
   },
   safetyChecked: {

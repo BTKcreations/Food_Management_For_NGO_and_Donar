@@ -14,7 +14,7 @@ export default function CreateDonation() {
     servings: '', preparedAt: '', expiresAt: '', address: user?.address || '',
     contactPhone: user?.phone || '', isVegetarian: false,
     latitude: 0, longitude: 0, specialInstructions: '',
-    safetyCertified: false, urgency: 'medium'
+    safetyCertified: false, urgency: 'medium', source: 'other'
   });
   const [basket, setBasket] = useState([]);
   const [currentItemName, setCurrentItemName] = useState('');
@@ -269,6 +269,19 @@ export default function CreateDonation() {
                 <option value="high">🔴 High (Quick expiry/Immediate need)</option>
               </select>
             </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label" htmlFor="source">Donation Source *</label>
+            <select id="source" name="source" className="form-select" value={formData.source} onChange={handleChange}>
+              <option value="restaurant">🍴 Restaurant</option>
+              <option value="hotel">🏨 Hotel / Banquet</option>
+              <option value="marriage_event">💍 Marriage / Wedding</option>
+              <option value="corporate_event">🏢 Corporate Event</option>
+              <option value="household">🏠 Household / Individual</option>
+              <option value="canteen">🏫 Canteen / Mess</option>
+              <option value="other">🍽️ Other</option>
+            </select>
           </div>
 
           <div className="form-group">

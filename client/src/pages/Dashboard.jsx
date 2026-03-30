@@ -35,7 +35,7 @@ export default function Dashboard() {
       if (user.role === 'donor') {
         const donationsRes = await api.get('/donations/my?limit=6');
         setRecentItems(donationsRes.data.donations);
-      } else if (user.role === 'volunteer' || user.role === 'ngo') {
+      } else if (user.role === 'ngo') {
         const transRes = await api.get('/transactions?activeOnly=true&limit=6');
         // Map transactions to donation shape for easier rendering via DonationCard
         const mapped = transRes.data.transactions.map(t => ({
@@ -85,13 +85,6 @@ export default function Dashboard() {
       ];
     }
 
-    if (user.role === 'volunteer') {
-      return [
-        { icon: '🚗', label: 'My Deliveries', value: analytics.myDeliveries || 0, color: 'primary', path: '/my-deliveries' },
-        { icon: '✅', label: 'Completed', value: analytics.completedDeliveries || 0, color: 'info', path: '/my-deliveries' },
-        { icon: '📦', label: 'Total Deliveries', value: analytics.totalDeliveries || 0, color: 'warning' }
-      ];
-    }
 
     return [];
   };
@@ -109,13 +102,6 @@ export default function Dashboard() {
         { label: 'Browse Food', icon: '🔍', path: '/donations', color: 'primary' },
         { label: 'Create Request', icon: '📋', path: '/requests/create', color: 'warning' },
         { label: 'My Requests', icon: '📝', path: '/my-requests', color: 'info' }
-      ];
-    }
-    if (user.role === 'volunteer') {
-      return [
-        { label: 'Available Pickups', icon: '📦', path: '/donations', color: 'primary' },
-        { label: 'My Deliveries', icon: '🚗', path: '/my-deliveries', color: 'info' },
-        { label: 'Transactions', icon: '🔄', path: '/transactions', color: 'warning' }
       ];
     }
     if (user.role === 'admin') {
@@ -155,7 +141,6 @@ export default function Dashboard() {
           <p className="dash-greeting-sub" style={{ fontSize: '1.0625rem', fontWeight: 500 }}>
             {user.role === 'donor' && 'Thank you for your generosity. Check your impact below.'}
             {user.role === 'ngo' && 'Browse available food donations and manage your requests.'}
-            {user.role === 'volunteer' && 'Check available pickups and track your deliveries.'}
             {user.role === 'admin' && 'Platform overview and management dashboard.'}
           </p>
         </div>
@@ -182,13 +167,7 @@ export default function Dashboard() {
                 {Math.round((user.role === 'donor' ? (analytics?.myDonations || 0) : (analytics?.totalReceived || 0)) * 2.5)}
               </p>
             </div>
-            {user.role === 'volunteer' && (
-              <div>
-                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '8px', fontWeight: 700 }}>✨ Karma Points</p>
-                <p style={{ fontSize: '2.5rem', fontWeight: 900, fontFamily: 'var(--font-heading)', lineHeight: 1, color: 'var(--accent)' }}>{user.karmaPoints || 0}</p>
-              </div>
-            )}
-            {user.role !== 'volunteer' && (
+            {user.role !== 'admin' && (
                <div>
                 <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '8px', fontWeight: 700 }}>🛡️ Trust Score</p>
                 <p style={{ fontSize: '2.5rem', fontWeight: 900, fontFamily: 'var(--font-heading)', lineHeight: 1, color: 'var(--info)' }}>{user.isVerifiedOrg ? '99+' : '65'}</p>
@@ -223,12 +202,11 @@ export default function Dashboard() {
         <div className="dash-section-header">
           <h2 className="dash-section-title">
             {user.role === 'donor' && '⚡ My Recent Contributions'}
-            {user.role === 'volunteer' && '🚚 Active Deliveries'}
             {user.role === 'ngo' && '📦 My Active Claims'}
             {user.role === 'admin' && '📊 Overall Platform Activity'}
           </h2>
           <Link 
-            to={user.role === 'donor' ? '/my-donations' : user.role === 'volunteer' ? '/my-deliveries' : '/donations'} 
+            to={user.role === 'donor' ? '/my-donations' : '/donations'} 
             className="btn btn-ghost btn-sm"
           >
             View All →

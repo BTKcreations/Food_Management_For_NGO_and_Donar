@@ -16,9 +16,8 @@ import CreateRequest from './pages/CreateRequest';
 import MyRequests from './pages/MyRequests';
 import Requests from './pages/Requests';
 import Transactions from './pages/Transactions';
-import Analytics from './pages/Analytics';
 import AdminUsers from './pages/AdminUsers';
-import VolunteerMarket from './pages/VolunteerMarket';
+import Analytics from './pages/Analytics';
 import Notifications from './pages/Notifications';
 import WarehouseManager from './pages/WarehouseManager';
 import './index.css';
@@ -55,13 +54,12 @@ function AppContent() {
         <Route path="/warehouse" element={<ProtectedRoute roles={['ngo', 'admin']}><WarehouseManager /></ProtectedRoute>} />
         <Route path="/receiver-dashboard" element={<ProtectedRoute roles={['receiver', 'admin', 'ngo']}><ReceiverDashboard /></ProtectedRoute>} />
 
-        {/* Volunteer routes */}
-        <Route path="/my-deliveries" element={<ProtectedRoute roles={['volunteer', 'admin']}><Transactions /></ProtectedRoute>} />
-        <Route path="/volunteer-market" element={<ProtectedRoute roles={['volunteer', 'admin']}><VolunteerMarket /></ProtectedRoute>} />
+        {/* NGO routes */}
+        <Route path="/my-deliveries" element={<ProtectedRoute roles={['ngo', 'admin']}><Transactions /></ProtectedRoute>} />
 
         {/* Admin routes */}
         <Route path="/users" element={<ProtectedRoute roles={['admin']}><AdminUsers /></ProtectedRoute>} />
-        <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+        <Route path="/analytics" element={<ProtectedRoute roles={['admin']}><Analytics /></ProtectedRoute>} />
 
         {/* Catch all */}
         <Route path="*" element={<Navigate to="/" replace />} />

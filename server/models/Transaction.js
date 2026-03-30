@@ -23,16 +23,18 @@ const transactionSchema = new mongoose.Schema({
   },
   allocatedServings: {
     type: Number,
-    required: true,
-    min: 1
+    min: 0
   },
   deliveryImages: [{
     type: String
   }],
   volunteer: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    default: null
+    ref: 'User'
+  },
+  ngo: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
   },
   liveLocation: {
     type: {
@@ -48,6 +50,10 @@ const transactionSchema = new mongoose.Schema({
   lastLocationUpdate: {
     type: Date,
     default: Date.now
+  },
+  safetyChecked: {
+    type: Boolean,
+    default: false
   },
   request: {
     type: mongoose.Schema.Types.ObjectId,

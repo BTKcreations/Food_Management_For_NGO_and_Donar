@@ -93,9 +93,8 @@ export default function Register() {
                 <label className="form-label" htmlFor="role">I want to join as *</label>
                 <select id="role" name="role" className="form-select" value={formData.role} onChange={handleChange}>
                   <option value="donor">🏪 Food Donor</option>
-                  <option value="ngo">🏛️ NGO / Food Bank</option>
-                  <option value="volunteer">🙋 Volunteer</option>
-                  <option value="receiver">😋 Recipient / Receiver</option>
+                  <option value="ngo">🏢 NGO / Food Bank</option>
+                  <option value="receiver">🏠 Receiver / Community Kitchen</option>
                 </select>
               </div>
             </div>

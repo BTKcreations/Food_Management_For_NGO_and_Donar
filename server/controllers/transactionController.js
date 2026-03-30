@@ -19,9 +19,11 @@ exports.createTransaction = async (req, res) => {
       donation: donationId,
       donor: donation.donor._id,
       receiver: req.user._id,
+      ngo: req.user._id, // The NGO claiming the food
       volunteer: volunteerId || null,
       request: requestId || null,
       pickupLocation: donation.location,
+      allocatedServings: req.body.allocatedServings || donation.remainingServings,
       notes
     });
 

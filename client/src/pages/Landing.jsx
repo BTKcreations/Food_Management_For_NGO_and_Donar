@@ -8,7 +8,6 @@ export default function Landing() {
   const stats = [
     { icon: '🍽️', value: '50K+', label: 'Meals Redistributed' },
     { icon: '🤝', value: '200+', label: 'Partner NGOs' },
-    { icon: '👥', value: '10K+', label: 'Volunteers' },
     { icon: '🏘️', value: '150+', label: 'Cities Covered' }
   ];
 
@@ -16,7 +15,7 @@ export default function Landing() {
     {
       icon: '📍',
       title: 'Real-Time Location Matching',
-      description: 'GPS-based matching connects donors with the nearest NGOs and volunteers for fastest food redistribution.'
+      description: 'GPS-based matching connects donors with the nearest NGOs for fastest food redistribution.'
     },
     {
       icon: '🔔',
@@ -34,9 +33,8 @@ export default function Landing() {
       description: 'Built-in food freshness validation ensures quality standards before redistribution.'
     },
     {
-      icon: '🚗',
-      title: 'Volunteer Coordination',
-      description: 'Efficient logistics management connects volunteers for pickup and delivery assignments.'
+      title: 'NGO Logistics Hub',
+      description: 'Centralized tools for NGOs to manage their own pickup and distribution fleets.'
     },
     {
       icon: '🤖',
@@ -60,8 +58,8 @@ export default function Landing() {
     },
     {
       step: '03',
-      title: 'Volunteers Collect',
-      description: 'Assigned volunteers pick up the food ensuring safe handling and transport.',
+      title: 'NGOs Collect',
+      description: 'Trained NGO staff pick up the food ensuring safe handling and transport.',
       icon: '🚚'
     },
     {
@@ -86,13 +84,6 @@ export default function Landing() {
       description: 'Non-governmental organizations coordinating food collection and distribution',
       action: 'Join as NGO',
       color: 'info'
-    },
-    {
-      icon: '🙋',
-      title: 'Volunteers',
-      description: 'Dedicated individuals helping with pickup, transport, and delivery of food',
-      action: 'Volunteer Now',
-      color: 'warning'
     }
   ];
 
@@ -118,7 +109,7 @@ export default function Landing() {
             </h1>
             <p className="hero-subtitle">
               A technology-driven platform connecting food surplus generators with NGOs, 
-              volunteers, and communities in need. Together, we can ensure no edible food goes to waste.
+              and communities in need. Together, we can ensure no edible food goes to waste.
             </p>
             <div className="hero-actions">
               {isAuthenticated ? (
@@ -232,7 +223,7 @@ export default function Landing() {
             <span className="section-tag">Join Us</span>
             <h2 className="section-title">Who Can Join?</h2>
             <p className="section-subtitle">
-              Whether you have surplus food, need food, or want to help — there's a role for everyone.
+              Whether you have surplus food or need food — there's a role for everyone.
             </p>
           </div>
 
@@ -256,7 +247,7 @@ export default function Landing() {
         <div className="container">
           <div className="cta-card">
             <h2>Ready to Make a Difference?</h2>
-            <p>Join thousands of donors, NGOs, and volunteers who are already fighting food waste and hunger.</p>
+            <p>Join thousands of donors and NGOs who are already fighting food waste and hunger.</p>
             <div className="cta-actions">
               <Link to="/register" className="btn btn-primary btn-lg">
                 Join FoodBridge Today →

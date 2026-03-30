@@ -34,6 +34,16 @@ export default function DonationCard({ donation, onClaim, showActions = true }) 
     other: '🍽️'
   };
 
+  const sourceDetails = {
+    restaurant: { icon: '🍴', label: 'Restaurant' },
+    hotel: { icon: '🏨', label: 'Hotel / Banquet' },
+    marriage_event: { icon: '💍', label: 'Marriage / Wedding' },
+    corporate_event: { icon: '🏢', label: 'Corporate Event' },
+    household: { icon: '🏠', label: 'Household' },
+    canteen: { icon: '🏫', label: 'Canteen / Mess' },
+    other: { icon: '🍽️', label: 'Other Source' }
+  };
+
   const isExpiringSoon = () => {
     const diff = new Date(donation.expiresAt) - new Date();
     return diff > 0 && diff < 3 * 60 * 60 * 1000; // less than 3 hours
@@ -59,7 +69,12 @@ export default function DonationCard({ donation, onClaim, showActions = true }) 
         </div>
       </div>
 
-      <h3 className="donation-food-name">{donation.foodName}</h3>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+        <h3 className="donation-food-name" style={{ marginBottom: 0 }}>{donation.foodName}</h3>
+        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', background: 'var(--bg-tertiary)', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>
+          {sourceDetails[donation.source]?.icon || '🍽️'} {sourceDetails[donation.source]?.label || 'Other'}
+        </span>
+      </div>
       
       {donation.description && (
         <p className="donation-description">{donation.description}</p>
