@@ -8,7 +8,7 @@ import './Dashboard.css';
 export default function CreateDonation() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  
+
   const [formData, setFormData] = useState({
     foodName: '', foodType: 'cooked', description: '', quantity: '',
     servings: '', preparedAt: '', expiresAt: '', address: user?.address || '',
@@ -38,8 +38,8 @@ export default function CreateDonation() {
 
   const addToBasket = () => {
     if (!currentItemName || !currentFile) return;
-    setBasket(prev => [...prev, { 
-      name: currentItemName, 
+    setBasket(prev => [...prev, {
+      name: currentItemName,
       file: currentFile,
       quantityOrWeight: itemQuantity,
       servings: itemServings,
@@ -88,18 +88,18 @@ export default function CreateDonation() {
 
     try {
       const data = new FormData();
-      
+
       // Auto-generate collective name and total quantity from basket
       const itemNames = basket.map(item => item.name);
-      const collectiveName = itemNames.length > 3 
+      const collectiveName = itemNames.length > 3
         ? `${itemNames.slice(0, 3).join(', ')} + ${itemNames.length - 3} more`
         : itemNames.join(' + ');
 
       // Also auto-suggest overall quantity if left blank
-      const totalItemsQuantity = basket.length === 1 
+      const totalItemsQuantity = basket.length === 1
         ? (basket[0].quantityOrWeight || '1 item')
         : `${basket.length} items (${itemNames.slice(0, 2).join(', ')}...)`;
-      
+
       Object.keys(formData).forEach(key => {
         data.append(key, formData[key]);
       });
@@ -164,11 +164,11 @@ export default function CreateDonation() {
                   ))}
                 </div>
               )}
-              
+
               {!showItemForm ? (
-                <button 
-                  type="button" 
-                  className="btn btn-primary" 
+                <button
+                  type="button"
+                  className="btn btn-primary"
                   style={{ width: '100%', padding: '1.25rem', fontSize: '1rem', border: '2px dashed var(--primary)', background: 'rgba(16, 185, 129, 0.05)', color: 'var(--primary)' }}
                   onClick={() => setShowItemForm(true)}
                 >
@@ -177,7 +177,7 @@ export default function CreateDonation() {
               ) : (
                 <div className="glass-card" style={{ padding: '1.5rem', border: '2px solid var(--primary-light)', animation: 'slideDown 0.3s ease', background: 'var(--bg-secondary)' }}>
                   <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-                    
+
                     {/* Step 1: Image & Preview */}
                     <div style={{ flex: '1 1 250px' }}>
                       <h4 style={{ fontSize: '0.875rem', marginBottom: '1rem', color: 'var(--text-muted)' }}>STEP 1: CAPTURE PHOTO</h4>
@@ -205,15 +205,15 @@ export default function CreateDonation() {
                     {currentFile && (
                       <div style={{ flex: '1 1 300px' }} className="animate-fade-in">
                         <h4 style={{ fontSize: '0.875rem', marginBottom: '1rem', color: 'var(--text-muted)' }}>STEP 2: ITEM DETAILS</h4>
-                        
+
                         <div className="form-group" style={{ marginBottom: '1rem' }}>
                           <label className="form-label" style={{ fontSize: '0.75rem' }}>What is this food? *</label>
-                          <input 
-                            type="text" 
-                            className="form-input" 
-                            placeholder="e.g. Tomato Soup, Veg Biryani..." 
-                            value={currentItemName} 
-                            onChange={(e) => setCurrentItemName(e.target.value)} 
+                          <input
+                            type="text"
+                            className="form-input"
+                            placeholder="e.g. Tomato Soup, Veg Biryani..."
+                            value={currentItemName}
+                            onChange={(e) => setCurrentItemName(e.target.value)}
                             autoFocus
                           />
                         </div>
@@ -316,11 +316,48 @@ export default function CreateDonation() {
             label="Set Pickup Location"
           />
 
-          <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '1.5rem' }}>
-            <input type="checkbox" id="isVegetarian" name="isVegetarian" checked={formData.isVegetarian} onChange={handleChange} style={{ width: 18, height: 18, accentColor: 'var(--primary)' }} />
-            <label htmlFor="isVegetarian" className="form-label" style={{ marginBottom: 0, cursor: 'pointer' }}>
-              🟢 This is vegetarian food
-            </label>
+          <div className="form-group" style={{ marginTop: '1.5rem' }}>
+            <label className="form-label" style={{ marginBottom: '0.75rem' }}>Dietary Profile</label>
+            <div style={{ display: 'inline-flex', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-full)', padding: '0.25rem', border: '1px solid var(--border-light)' }}>
+              <button 
+                type="button" 
+                onClick={() => setFormData(prev => ({ ...prev, isVegetarian: true }))}
+                style={{ 
+                  padding: '0.6rem 1.25rem', 
+                  borderRadius: 'var(--radius-full)', 
+                  background: formData.isVegetarian ? '#10b981' : 'transparent', 
+                  color: formData.isVegetarian ? '#ffffff' : 'var(--text-secondary)', 
+                  fontWeight: formData.isVegetarian ? 700 : 500, 
+                  border: 'none', 
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                🟢 Pure Veg
+              </button>
+              <button 
+                type="button" 
+                onClick={() => setFormData(prev => ({ ...prev, isVegetarian: false }))}
+                style={{ 
+                  padding: '0.6rem 1.25rem', 
+                  borderRadius: 'var(--radius-full)', 
+                  background: !formData.isVegetarian ? '#ef4444' : 'transparent', 
+                  color: !formData.isVegetarian ? '#ffffff' : 'var(--text-secondary)', 
+                  fontWeight: !formData.isVegetarian ? 700 : 500, 
+                  border: 'none', 
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                🔴 Non-Veg (Contains Meat/Eggs)
+              </button>
+            </div>
           </div>
 
           <div className="form-group" style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', padding: '1rem', background: 'rgba(16, 185, 129, 0.05)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(16, 185, 129, 0.1)', marginTop: '1rem' }}>
@@ -332,7 +369,7 @@ export default function CreateDonation() {
 
           <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
             <button type="submit" className="btn btn-primary btn-lg" disabled={loading} id="create-donation-submit" style={{ flex: 1 }}>
-              {loading ? 'Creating Your Basket...' : '🚀 Submit Donation Basket'}
+              {loading ? 'Creating Your Donation...' : '🚀 Submit Donation'}
             </button>
             <button type="button" className="btn btn-ghost btn-lg" onClick={() => navigate(-1)}>
               Cancel
