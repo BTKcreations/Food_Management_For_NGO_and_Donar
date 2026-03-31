@@ -157,7 +157,9 @@ export default function CreateDonation() {
                       <img src={URL.createObjectURL(item.file)} alt="Preview" style={{ height: '110px' }} />
                       <div style={{ padding: '10px', background: 'var(--bg-secondary)', borderTop: '1px solid var(--border-light)' }}>
                         <p style={{ fontSize: '0.8125rem', fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: '2px' }}>{item.name}</p>
-                        <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{item.quantityOrWeight || 'No qty'}</p>
+                        <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
+                          {item.quantityOrWeight || 'No qty'} {item.servings > 0 && ` • ${item.servings} Servs`}
+                        </p>
                       </div>
                       <button type="button" className="preview-remove" onClick={() => removeFromBasket(i)}>×</button>
                     </div>
@@ -219,9 +221,13 @@ export default function CreateDonation() {
                         </div>
 
                         <div className="form-row" style={{ gap: '0.75rem', marginBottom: '1rem' }}>
-                          <div className="form-group" style={{ marginBottom: 0 }}>
+                          <div className="form-group" style={{ marginBottom: 0, flex: 1 }}>
                             <label className="form-label" style={{ fontSize: '0.75rem' }}>Qty / Weight</label>
                             <input type="text" className="form-input" placeholder="e.g. 2 kg, 1 box" value={itemQuantity} onChange={e => setItemQuantity(e.target.value)} />
+                          </div>
+                          <div className="form-group" style={{ marginBottom: 0, flex: 1 }}>
+                            <label className="form-label" style={{ fontSize: '0.75rem' }}>Est. Servings</label>
+                            <input type="number" min="0" className="form-input" placeholder="Total servings" value={itemServings} onChange={e => setItemServings(e.target.value)} />
                           </div>
 
                         </div>

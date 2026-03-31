@@ -101,6 +101,12 @@ export default function DonationCard({ donation, onClaim, showActions = true }) 
             <span className="meta-icon">📦</span>
             <span className="meta-text">{donation.quantity || 'Unspecified'}</span>
           </div>
+          {donation.servings > 0 && (
+            <div className="meta-item">
+              <span className="meta-icon">🍽️</span>
+              <span className="meta-text">{donation.servings} Servings</span>
+            </div>
+          )}
           <div className="meta-item">
             <span className="meta-icon">⏰</span>
             <span className={`meta-text ${isExpiringSoon() ? 'text-urgent' : ''}`}>

@@ -114,8 +114,14 @@ export default function DonationDetails() {
   const handleClaimSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.put(`/donations/${id}/claim`, claimData);
-      setMessage(`${claimData.claimQuantity} unit(s) claimed successfully!`);
+      // Option A: Automatically claim full remaining volume as a Warehouse Hub drop.
+      const payload = {
+        claimQuantity: donation.remainingServings,
+        destinationType: 'warehouse',
+        notes: 'Bulk Hub Pickup'
+      };
+      await api.put(`/donations/${id}/claim`, payload);
+      setMessage(`Full basket claimed successfully!`);
       setShowClaimModal(false);
       fetchDonation();
     } catch (err) {
@@ -499,60 +505,25 @@ export default function DonationDetails() {
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', paddingTop: '1rem', borderTop: '1px solid var(--border-light)' }}>
           {canClaim && (
             <button className="btn btn-primary" onClick={() => setShowClaimModal(true)}>
-              🤝 Logic Claim / Redistribute
+              🤝 Claim Full Basket (NGO Pickup)
             </button>
           )}
 
           {showClaimModal && (
             <div className="modal-overlay">
               <div className="modal-content glass-card animate-zoom-in">
-                <h2 style={{ marginBottom: '1rem' }}>Smart Redistribution</h2>
+                <h2 style={{ marginBottom: '1rem' }}>Claim Full Basket</h2>
                 <form onSubmit={handleClaimSubmit}>
-                  <div className="form-group">
-                    <label className="form-label">How much to claim? (Max {donation.remainingServings || '1 batch'})</label>
-                    <input 
-                      type="number" 
-                      className="form-input" 
-                      max={donation.remainingServings || 1} 
-                      min="1" 
-                      value={claimData.claimQuantity}
-                      onChange={(e) => setClaimData({...claimData, claimQuantity: e.target.value})}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="form-group">
-                    <label className="form-label">Destination Logic</label>
-                    <select 
-                      className="form-select" 
-                      value={claimData.destinationType}
-                      onChange={(e) => setClaimData({...claimData, destinationType: e.target.value})}
-                    >
-                      <option value="receiver">Direct to Receiver Request</option>
-                      <option value="warehouse">NGO Warehouse (Bulk Storage)</option>
-                    </select>
-                  </div>
-
-                  {claimData.destinationType === 'receiver' && (
-                    <div className="form-group">
-                      <label className="form-label">Match to Receiver</label>
-                      <select 
-                        className="form-select" 
-                        value={claimData.receiverId}
-                        onChange={(e) => setClaimData({...claimData, receiverId: e.target.value})}
-                        required
-                      >
-                        <option value="">Select a receiver...</option>
-                        {receivers.map(r => (
-                          <option key={r._id} value={r._id}>{r.name} ({r.organization || 'Individual'})</option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
+                  <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: '1.5' }}>
+                    You are electing to pick up this entire donation ({donation.servings > 0 ? `${donation.servings} Servings` : donation.quantity}) and transport it to your NGO Hub for further community distribution.
+                  </p>
+                  <p style={{ color: '#d97706', fontWeight: 600, fontSize: '0.875rem', marginBottom: '1.5rem', background: 'rgba(245, 158, 11, 0.1)', padding: '0.75rem', borderRadius: 'var(--radius-sm)' }}>
+                    📍 A Live-Tracking pickup session will be activated.
+                  </p>
 
                   <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
-                    <button type="button" className="btn btn-ghost" onClick={() => setShowClaimModal(false)}>Cancel</button>
-                    <button type="submit" className="btn btn-primary">Process Redistribution</button>
+                    <button type="button" className="btn btn-ghost" onClick={() => setShowClaimModal(false)} style={{ flex: 1 }}>Cancel</button>
+                    <button type="submit" className="btn btn-primary" style={{ flex: 2 }}>Confirm Pickup Assignment</button>
                   </div>
                 </form>
               </div>

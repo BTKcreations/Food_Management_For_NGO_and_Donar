@@ -17,6 +17,7 @@ exports.createDonation = async (req, res) => {
 
     // Handle items (name + image + dates + quant/serv mapping)
     const items = [];
+    let aggregatedServings = 0;
     if (itemNames && req.files) {
       const names = Array.isArray(itemNames) ? itemNames : [itemNames];
       const prepDates = Array.isArray(itemPreparedDates) ? itemPreparedDates : [itemPreparedDates];
@@ -26,13 +27,15 @@ exports.createDonation = async (req, res) => {
       
       names.forEach((name, index) => {
         if (req.files[index]) {
+          const s = parseInt(itemservings[index]) || 0;
+          aggregatedServings += s;
           items.push({
             name,
             image: req.files[index].path,
             preparedAt: prepDates[index] || null,
             expiresAt: expiryDates[index] || null,
             quantityOrWeight: quantities[index] || '',
-            servings: parseInt(itemservings[index]) || 0
+            servings: s
           });
         }
       });
@@ -44,7 +47,7 @@ exports.createDonation = async (req, res) => {
       foodName,
       description,
       quantity: quantity || undefined,
-      servings: servings || undefined,
+      servings: parseInt(servings) > 0 ? parseInt(servings) : (aggregatedServings > 0 ? aggregatedServings : undefined),
       preparedAt,
       expiresAt,
       address,
@@ -228,27 +231,15 @@ exports.claimDonation = async (req, res) => {
       return res.status(400).json({ success: false, message: `Donation is ${donation.status}` });
     }
 
-    // Handle "batch" claims for quantity-based items without numeric servings
-    const isBatch = donation.servings === 0;
-    const amountToClaim = isBatch ? 1 : (parseInt(claimQuantity) || donation.remainingServings);
+    // Hub & Spoke Option A Requirement: All claims are Bulk Claims.
+    const isBatch = true;
+    const amountToClaim = donation.remainingServings || 1;
 
-    if (!isBatch && amountToClaim > donation.remainingServings) {
-      return res.status(400).json({ success: false, message: `Only ${donation.remainingServings} units left` });
-    }
-
-    // Determine destination
-    let finalReceiverId = req.user._id; // Default is NGO itself
-    if (destinationType === 'receiver' && receiverId) {
-      finalReceiverId = receiverId;
-    }
+    // Determine destination (Always NGO Warehouse for Inbound Leg)
+    const finalReceiverId = req.user._id;
 
     // Update donation quantity
-    if (!isBatch) {
-      donation.remainingServings -= amountToClaim;
-      donation.status = donation.remainingServings <= 0 ? 'fully_claimed' : 'partially_claimed';
-    } else {
-      donation.status = 'fully_claimed';
-    }
+    donation.status = 'fully_claimed';
     
     donation.claimedBy = req.user._id;
     donation.claimedAt = new Date();

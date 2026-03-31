@@ -77,7 +77,9 @@ export default function MyDonations() {
               </div>
               
               <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
-                {donation.servings} servings • {donation.quantity} • {donation.foodType}
+                {donation.servings > 0 ? `${donation.servings} servings • ` : ''}
+                {donation.quantity ? `${donation.quantity} • ` : ''}
+                {donation.foodType?.replace('_', ' ')}
               </p>
               
               <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>

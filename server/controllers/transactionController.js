@@ -3,6 +3,7 @@ const Donation = require('../models/Donation');
 const User = require('../models/User');
 const Notification = require('../models/Notification');
 const Inventory = require('../models/Inventory');
+const Request = require('../models/Request');
 
 // @desc    Create a transaction when donation is claimed
 // @route   POST /api/transactions
@@ -38,6 +39,75 @@ exports.createTransaction = async (req, res) => {
       message: 'Error creating transaction',
       error: error.message
     });
+  }
+};
+
+// @desc    Distribute food from NGO inventory to a Receiver Request
+// @route   POST /api/transactions/outbound
+exports.distributeInventory = async (req, res) => {
+  try {
+    const { inventoryId, requestId, allocatedQuantity, notes } = req.body;
+    
+    // 1. Fetch Inventory item
+    const inventory = await Inventory.findById(inventoryId).populate('sourceDonation');
+    if (!inventory) return res.status(404).json({ success: false, message: 'Inventory item not found' });
+    if (inventory.ngo.toString() !== req.user._id.toString()) return res.status(403).json({ success: false, message: 'Not your inventory' });
+    
+    // 2. Fetch Receiver Request
+    const receiverRequest = await Request.findById(requestId).populate('requester');
+    if (!receiverRequest) return res.status(404).json({ success: false, message: 'Request not found' });
+    if (receiverRequest.status !== 'open') return res.status(400).json({ success: false, message: 'Request is no longer open' });
+    
+    const qtyToDeduct = parseInt(allocatedQuantity) || receiverRequest.servingsNeeded;
+    if (qtyToDeduct > inventory.quantity) {
+      return res.status(400).json({ success: false, message: `Only ${inventory.quantity} remaining in inventory` });
+    }
+    
+    // 3. Create Outbound Transaction
+    const pickupCode = Math.floor(1000 + Math.random() * 9000).toString();
+    const deliveryCode = Math.floor(1000 + Math.random() * 9000).toString();
+    
+    const transaction = await Transaction.create({
+      donation: inventory.sourceDonation ? inventory.sourceDonation._id : null,
+      donor: inventory.sourceDonation ? inventory.sourceDonation.donor : req.user._id,
+      receiver: receiverRequest.requester._id,
+      request: receiverRequest._id,
+      ngo: req.user._id,
+      destinationType: 'receiver',
+      allocatedServings: qtyToDeduct,
+      status: 'accepted',
+      pickupLocation: req.user.location || { type: 'Point', coordinates: [0, 0] },
+      notes: notes || `Outbound Delivery from Hub: ${inventory.foodName}`,
+      pickupCode,
+      deliveryCode
+    });
+    
+    // 4. Update Inventory
+    inventory.quantity -= qtyToDeduct;
+    if (inventory.quantity <= 0) {
+      await Inventory.findByIdAndDelete(inventory._id);
+    } else {
+      await inventory.save();
+    }
+    
+    // 5. Update Request
+    receiverRequest.status = 'matched';
+    receiverRequest.matchedDonation = transaction.donation;
+    await receiverRequest.save();
+    
+    // 6. Notify Receiver
+    await Notification.create({
+      recipient: receiverRequest.requester._id,
+      sender: req.user._id,
+      type: 'delivery_assigned',
+      title: '🚚 Your Food Request is Fulfilling!',
+      message: `${req.user.name} is preparing ${qtyToDeduct} servings of ${inventory.foodName} for your location.`,
+      relatedDonation: transaction.donation
+    });
+    
+    res.status(201).json({ success: true, message: 'Outbound Delivery initialized', transaction });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -225,14 +295,27 @@ exports.updateTransactionStatus = async (req, res) => {
         const Donation = require('../models/Donation');
         const donation = await Donation.findById(transaction.donation);
         
-        await Inventory.create({
-          ngo: transaction.receiver, // NGO is the receiver in this case
-          foodName: donation.foodName,
-          foodType: donation.foodType,
-          quantity: transaction.allocatedServings,
-          expiryDate: donation.expiresAt,
-          sourceDonation: donation._id
-        });
+        if (donation.items && donation.items.length > 0) {
+          const inventoryItems = donation.items.map(item => ({
+            ngo: transaction.receiver,
+            foodName: item.name,
+            foodType: donation.foodType,
+            quantity: item.servings > 0 ? item.servings : parseInt(item.quantityOrWeight) || 1,
+            unit: item.servings > 0 ? 'servings' : 'units',
+            expiryDate: item.expiresAt || donation.expiresAt,
+            sourceDonation: donation._id
+          }));
+          await Inventory.insertMany(inventoryItems);
+        } else {
+          await Inventory.create({
+            ngo: transaction.receiver,
+            foodName: donation.foodName,
+            foodType: donation.foodType,
+            quantity: transaction.allocatedServings || donation.quantity,
+            expiryDate: donation.expiresAt,
+            sourceDonation: donation._id
+          });
+        }
       } else {
         // Increment receiver stats
         await User.findByIdAndUpdate(transaction.receiver, { $inc: { totalReceived: 1 } });

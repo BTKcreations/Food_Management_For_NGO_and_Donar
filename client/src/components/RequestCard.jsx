@@ -47,15 +47,26 @@ export default function RequestCard({ request, onCancel }) {
         )}
       </div>
 
-      {request.status === 'open' && onCancel && (
+      {request.status === 'open' && (onCancel || onFulfill) && (
         <div className="request-actions">
-          <button 
-            className="btn btn-ghost btn-sm" 
-            style={{ width: '100%' }}
-            onClick={(e) => { e.stopPropagation(); onCancel(request._id); }}
-          >
-            Cancel Request
-          </button>
+          {onFulfill && (
+            <button 
+              className="btn btn-primary btn-sm" 
+              style={{ width: '100%', marginBottom: '0.5rem' }}
+              onClick={(e) => { e.stopPropagation(); onFulfill(request); }}
+            >
+              🤝 Fulfill from Hub Inventory
+            </button>
+          )}
+          {onCancel && (
+            <button 
+              className="btn btn-ghost btn-sm" 
+              style={{ width: '100%' }}
+              onClick={(e) => { e.stopPropagation(); onCancel(request._id); }}
+            >
+              Cancel Request
+            </button>
+          )}
         </div>
       )}
       
