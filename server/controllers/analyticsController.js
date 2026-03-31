@@ -19,7 +19,6 @@ exports.getAnalytics = async (req, res) => {
     const totalUsers = await User.countDocuments({ isActive: true });
     const totalDonors = await User.countDocuments({ role: 'donor', isActive: true });
     const totalNGOs = await User.countDocuments({ role: 'ngo', isActive: true });
-    const totalVolunteers = await User.countDocuments({ role: 'volunteer', isActive: true });
 
     const totalTransactions = await Transaction.countDocuments();
     const completedTransactions = await Transaction.countDocuments({ status: 'completed' });
@@ -54,12 +53,6 @@ exports.getAnalytics = async (req, res) => {
       .sort({ totalDonations: -1 })
       .limit(10);
 
-    // Top volunteers
-    const topVolunteers = await User.find({ role: 'volunteer', totalDeliveries: { $gt: 0 } })
-      .select('name totalDeliveries')
-      .sort({ totalDeliveries: -1 })
-      .limit(10);
-
     // Status distribution
     const statusDistribution = await Donation.aggregate([
       { $group: { _id: '$status', count: { $sum: 1 } } }
@@ -76,7 +69,6 @@ exports.getAnalytics = async (req, res) => {
           totalUsers,
           totalDonors,
           totalNGOs,
-          totalVolunteers,
           totalTransactions,
           completedTransactions,
           pendingTransactions,
@@ -89,7 +81,6 @@ exports.getAnalytics = async (req, res) => {
         donationsByType,
         donationsOverTime,
         topDonors,
-        topVolunteers,
         statusDistribution
       }
     });
@@ -141,15 +132,6 @@ exports.getMyAnalytics = async (req, res) => {
         myRequests,
         fulfilledRequests,
         totalReceived: req.user.totalReceived
-      };
-    } else if (role === 'volunteer') {
-      const myDeliveries = await Transaction.countDocuments({ volunteer: userId });
-      const completedDeliveries = await Transaction.countDocuments({ volunteer: userId, status: 'completed' });
-
-      analytics = {
-        myDeliveries,
-        completedDeliveries,
-        totalDeliveries: req.user.totalDeliveries
       };
     }
 

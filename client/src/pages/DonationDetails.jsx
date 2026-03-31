@@ -95,7 +95,7 @@ export default function DonationDetails() {
     }
 
     let observerInterval = null;
-    if (user?.role !== 'ngo' && transaction?.status === 'in_transit') {
+    if (user?.role !== 'ngo' && transaction && ['accepted', 'in_transit'].includes(transaction.status)) {
       observerInterval = setInterval(async () => {
         try {
           const transRes = await api.get(`/transactions/${transaction._id}`);

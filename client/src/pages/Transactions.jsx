@@ -8,17 +8,17 @@ export default function Transactions() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('');
   const location = useLocation();
-  const isVolunteerMode = location.pathname === '/my-deliveries';
+  const isNGOMode = location.pathname === '/my-deliveries';
 
   useEffect(() => {
     fetchTransactions();
-  }, [filter, isVolunteerMode]);
+  }, [filter, isNGOMode]);
 
   const fetchTransactions = async () => {
     setLoading(true);
     try {
       const statusParam = filter ? `status=${filter}` : '';
-      const roleParam = isVolunteerMode ? 'role=volunteer' : '';
+      const roleParam = isNGOMode ? 'role=ngo' : '';
       const queryParams = [statusParam, roleParam].filter(Boolean).join('&');
       const res = await api.get(`/transactions${queryParams ? `?${queryParams}` : ''}`);
       setTransactions(res.data.transactions);
@@ -38,6 +38,16 @@ export default function Transactions() {
     cancelled: 'badge-neutral'
   };
 
+  const sourceIcons = {
+    restaurant: '🍴 Restaurant', 
+    hotel: '🏨 Hotel / Banquet', 
+    marriage_event: '💍 Marriage', 
+    corporate_event: '🏢 Corporate', 
+    household: '🏠 Household', 
+    canteen: '🏫 Canteen', 
+    other: '🍽️ Other'
+  };
+
   if (loading) {
     return <div className="dashboard-page"><div className="loading-container"><div className="spinner"></div></div></div>;
   }
@@ -45,9 +55,9 @@ export default function Transactions() {
   return (
     <div className="dashboard-page">
       <div className="page-header animate-fade-in">
-        <h1 className="page-title">{isVolunteerMode ? '🚚 My Deliveries' : '🔄 Transactions'}</h1>
+        <h1 className="page-title">{isNGOMode ? '🚚 My Deliveries' : '🔄 Transactions'}</h1>
         <p className="page-subtitle">
-          {isVolunteerMode 
+          {isNGOMode 
             ? 'Track your assigned food pickups and deliveries' 
             : 'Track food redistribution transactions'}
         </p>
@@ -79,8 +89,9 @@ export default function Transactions() {
               <tr>
                 <th>Food</th>
                 <th>Donor</th>
+                <th>Source</th>
                 <th>Receiver</th>
-                {!isVolunteerMode && <th>Volunteer</th>}
+                {!isNGOMode && <th>NGO</th>}
                 <th>Status</th>
                 <th>Date</th>
               </tr>
@@ -96,8 +107,13 @@ export default function Transactions() {
                     </span>
                   </td>
                   <td>{t.donor?.name || 'N/A'}</td>
+                  <td>
+                    <span className="badge badge-secondary" style={{ fontSize: '0.75rem' }}>
+                      {sourceIcons[t.donation?.source] || '🍽️ Other'}
+                    </span>
+                  </td>
                   <td>{t.receiver?.name || 'N/A'}</td>
-                  {!isVolunteerMode && <td>{t.volunteer?.name || '—'}</td>}
+                  {!isNGOMode && <td>{t.ngo?.name || '—'}</td>}
                   <td><span className={`badge ${statusColors[t.status]}`}>{t.status?.replace('_', ' ')}</span></td>
                   <td style={{ fontSize: '0.8125rem' }}>{new Date(t.createdAt).toLocaleDateString()}</td>
                 </tr>

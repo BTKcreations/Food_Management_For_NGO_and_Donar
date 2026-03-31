@@ -8,7 +8,7 @@ const Inventory = require('../models/Inventory');
 // @route   POST /api/transactions
 exports.createTransaction = async (req, res) => {
   try {
-    const { donationId, volunteerId, requestId, notes } = req.body;
+    const { donationId, requestId, notes } = req.body;
 
     const donation = await Donation.findById(donationId).populate('donor');
     if (!donation) {
@@ -20,28 +20,11 @@ exports.createTransaction = async (req, res) => {
       donor: donation.donor._id,
       receiver: req.user._id,
       ngo: req.user._id, // The NGO claiming the food
-      volunteer: volunteerId || null,
       request: requestId || null,
       pickupLocation: donation.location,
       allocatedServings: req.body.allocatedServings || donation.remainingServings,
       notes
     });
-
-    // Notify volunteer if assigned
-    if (volunteerId) {
-      await Notification.create({
-        recipient: volunteerId,
-        sender: req.user._id,
-        type: 'volunteer_assigned',
-        title: '🚗 You have a new delivery assignment!',
-        message: `Please pick up ${donation.foodName} from ${donation.address}.`,
-        relatedDonation: donationId,
-        relatedTransaction: transaction._id
-      });
-
-      donation.assignedVolunteer = volunteerId;
-      await donation.save();
-    }
 
     res.status(201).json({
       success: true,
@@ -66,27 +49,19 @@ exports.getTransactions = async (req, res) => {
     let filter = {};
 
     if (req.user.role !== 'admin') {
-      if (role === 'volunteer') {
-        filter.volunteer = req.user._id;
+      if (role === 'ngo') {
+        filter.ngo = req.user._id;
       } else if (role === 'donor') {
         filter.donor = req.user._id;
       } else if (role === 'receiver') {
         filter.receiver = req.user._id;
       } else {
-        // Base visibility: user is donor, receiver, or current volunteer
-        const basicVisibility = [
+        // Base visibility: user is donor, receiver, or ngo
+        filter.$or = [
           { donor: req.user._id },
           { receiver: req.user._id },
-          { volunteer: req.user._id }
+          { ngo: req.user._id }
         ];
-
-        // If user is a volunteer, they also need to see "Marketplace" items
-        // (Claimed by NGO, but no volunteer yet)
-        if (req.user.role === 'volunteer') {
-          basicVisibility.push({ volunteer: null, status: 'accepted' });
-        }
-
-        filter.$or = basicVisibility;
       }
     }
 
@@ -97,10 +72,10 @@ exports.getTransactions = async (req, res) => {
     }
 
     const transactions = await Transaction.find(filter)
-      .populate('donation', 'foodName foodType quantity servings status images address')
+      .populate('donation', 'foodName foodType source quantity servings status images address')
       .populate('donor', 'name email phone organization')
       .populate('receiver', 'name email phone organization')
-      .populate('volunteer', 'name email phone')
+      .populate('ngo', 'name email phone')
       .sort({ createdAt: -1 })
       .skip((parseInt(page) - 1) * parseInt(limit))
       .limit(parseInt(limit));
@@ -160,7 +135,7 @@ exports.getTransaction = async (req, res) => {
       .populate('donation')
       .populate('donor', 'name email phone organization')
       .populate('receiver', 'name email phone organization')
-      .populate('volunteer', 'name email phone');
+      .populate('ngo', 'name email phone');
 
     if (!transaction) {
       return res.status(404).json({ success: false, message: 'Transaction not found' });
@@ -169,10 +144,10 @@ exports.getTransaction = async (req, res) => {
     // Authorization check
     const isDonor = transaction.donor._id.toString() === req.user._id.toString();
     const isReceiver = transaction.receiver._id.toString() === req.user._id.toString();
-    const isVolunteer = transaction.volunteer?._id.toString() === req.user._id.toString();
+    const isNGO = transaction.ngo?._id.toString() === req.user._id.toString();
     const isAdmin = req.user.role === 'admin';
 
-    if (!isDonor && !isReceiver && !isVolunteer && !isAdmin) {
+    if (!isDonor && !isReceiver && !isNGO && !isAdmin) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
 
@@ -235,9 +210,9 @@ exports.updateTransactionStatus = async (req, res) => {
         transaction.deliveryImages = req.files.map(file => file.path);
       }
       
-      // Update volunteer stats & Karma
-      if (transaction.volunteer) {
-        await User.findByIdAndUpdate(transaction.volunteer, { 
+      // Update ngo stats & Karma
+      if (transaction.ngo) {
+        await User.findByIdAndUpdate(transaction.ngo, { 
           $inc: { 
             totalDeliveries: 1,
             karmaPoints: 10 
@@ -323,9 +298,9 @@ exports.updateTransactionStatus = async (req, res) => {
       donorMsg = `Your donation of ${transaction.donation?.foodName} has been picked up and is on its way.`;
       donorNotifType = 'donation_picked_up';
       
-      // Notify NGO (Receiver)
+      // Notify NGO (Receiver/Deliverer)
       receiverTitle = '🚚 Food is in transit!';
-      receiverMsg = `A volunteer has picked up the food (${transaction.donation?.foodName}) and is heading your way.`;
+      receiverMsg = `An NGO has picked up the food (${transaction.donation?.foodName}) and is heading your way.`;
       receiverNotifType = 'donation_picked_up';
     } else if (status === 'delivered') {
       // Notify Donor

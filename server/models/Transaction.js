@@ -28,10 +28,7 @@ const transactionSchema = new mongoose.Schema({
   deliveryImages: [{
     type: String
   }],
-  volunteer: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  },
+
   ngo: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'

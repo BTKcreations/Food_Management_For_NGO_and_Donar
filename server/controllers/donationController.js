@@ -168,8 +168,8 @@ exports.getDonation = async (req, res) => {
   try {
     const donation = await Donation.findById(req.params.id)
       .populate('donor', 'name email phone organization profileImage address')
-      .populate('claimedBy', 'name email phone organization')
-      .populate('assignedVolunteer', 'name email phone');
+      .populate('claimedBy', 'name email phone organization');
+
 
     if (!donation) {
       return res.status(404).json({
@@ -197,7 +197,6 @@ exports.getMyDonations = async (req, res) => {
   try {
     const donations = await Donation.find({ donor: req.user._id })
       .populate('claimedBy', 'name email phone organization')
-      .populate('assignedVolunteer', 'name phone')
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -218,7 +217,7 @@ exports.getMyDonations = async (req, res) => {
 // @route   PUT /api/donations/:id/claim
 exports.claimDonation = async (req, res) => {
   try {
-    const { claimQuantity, destinationType, receiverId, notes } = req.body;
+    const { claimQuantity, destinationType, receiverId, notes } = req.body || {};
     const donation = await Donation.findById(req.params.id);
 
     if (!donation) {
@@ -229,10 +228,12 @@ exports.claimDonation = async (req, res) => {
       return res.status(400).json({ success: false, message: `Donation is ${donation.status}` });
     }
 
-    const amountToClaim = parseInt(claimQuantity) || donation.remainingServings;
+    // Handle "batch" claims for quantity-based items without numeric servings
+    const isBatch = donation.servings === 0;
+    const amountToClaim = isBatch ? 1 : (parseInt(claimQuantity) || donation.remainingServings);
 
-    if (amountToClaim > donation.remainingServings) {
-      return res.status(400).json({ success: false, message: `Only ${donation.remainingServings} servings left` });
+    if (!isBatch && amountToClaim > donation.remainingServings) {
+      return res.status(400).json({ success: false, message: `Only ${donation.remainingServings} units left` });
     }
 
     // Determine destination
@@ -242,8 +243,13 @@ exports.claimDonation = async (req, res) => {
     }
 
     // Update donation quantity
-    donation.remainingServings -= amountToClaim;
-    donation.status = donation.remainingServings <= 0 ? 'fully_claimed' : 'partially_claimed';
+    if (!isBatch) {
+      donation.remainingServings -= amountToClaim;
+      donation.status = donation.remainingServings <= 0 ? 'fully_claimed' : 'partially_claimed';
+    } else {
+      donation.status = 'fully_claimed';
+    }
+    
     donation.claimedBy = req.user._id;
     donation.claimedAt = new Date();
     await donation.save();
@@ -272,7 +278,8 @@ exports.claimDonation = async (req, res) => {
       pickupLocation: donation.location,
       notes: notes || `Redistribution of ${amountToClaim} servings`,
       pickupCode,
-      deliveryCode
+      deliveryCode,
+      ngo: req.user._id
     });
 
     res.status(200).json({
@@ -334,7 +341,6 @@ exports.updateDonationStatus = async (req, res) => {
     if (status === 'available') {
       donation.claimedBy = null;
       donation.claimedAt = null;
-      donation.assignedVolunteer = null;
     }
     
     await donation.save();
