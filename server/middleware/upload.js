@@ -1,39 +1,92 @@
 const multer = require('multer');
-const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const path = require('path');
+const fs = require('fs');
 
-// Configure Cloudinary
-if (process.env.CLOUDINARY_API_KEY === 'your_api_key' || !process.env.CLOUDINARY_API_KEY) {
-  console.warn('\n⚠️  CLOUDINARY WARNING: You are using placeholder API keys. Image uploads will FAIL until you add real keys to server/.env\n');
+// Ensure uploads directory exists
+const uploadDir = 'uploads/';
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
-});
-
-// Configure Cloudinary Storage for Multer
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'food-bridge/donations', // Organization folder
-    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
-    transformation: [{ width: 1000, height: 1000, crop: 'limit' }] // Optimize in the cloud
+// Configure Local Disk Storage for Multer
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
   }
 });
 
 const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  limits: { fileSize: 10 * 1024 * 1024 }, // Increased to 10MB for local storage
   fileFilter: function(req, file, cb) {
     const filetypes = /jpeg|jpg|png|webp/;
     const mimetype = filetypes.test(file.mimetype);
-    if (mimetype) {
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+
+    if (mimetype && extname) {
       return cb(null, true);
     }
     cb(new Error('Only image files (jpeg, jpg, png, webp) are allowed'));
   }
 });
 
-module.exports = upload;
+// Middleware wrapper to normalize paths for DB storage
+const normalizePaths = (req) => {
+  const normalizePath = (p) => {
+    if (!p) return p;
+    // Ensure it starts with /uploads/ and uses forward slashes
+    let normalized = p.replace(/\\/g, '/');
+    if (!normalized.startsWith('/')) normalized = '/' + normalized;
+    return normalized;
+  };
+
+  if (req.file) {
+    req.file.path = normalizePath(req.file.path);
+  }
+  if (req.files) {
+    if (Array.isArray(req.files)) {
+      req.files.forEach(f => f.path = normalizePath(f.path));
+    } else {
+      Object.keys(req.files).forEach(key => {
+        req.files[key].forEach(f => f.path = normalizePath(f.path));
+      });
+    }
+  }
+};
+
+const uploadMiddleware = {
+  single: (fieldName) => (req, res, next) => {
+    upload.single(fieldName)(req, res, (err) => {
+      if (err) return next(err);
+      normalizePaths(req);
+      next();
+    });
+  },
+  array: (fieldName, maxCount) => (req, res, next) => {
+    upload.array(fieldName, maxCount)(req, res, (err) => {
+      if (err) return next(err);
+      normalizePaths(req);
+      next();
+    });
+  },
+  fields: (fields) => (req, res, next) => {
+    upload.fields(fields)(req, res, (err) => {
+      if (err) return next(err);
+      normalizePaths(req);
+      next();
+    });
+  },
+  any: () => (req, res, next) => {
+    upload.any()(req, res, (err) => {
+      if (err) return next(err);
+      normalizePaths(req);
+      next();
+    });
+  }
+};
+
+module.exports = uploadMiddleware;

@@ -151,10 +151,10 @@ export default function Notifications() {
           animation: fadeInUp 0.5s ease both;
         }
         .notif-full-item:hover {
-          background: rgba(255, 255, 255, 0.02);
+          background: var(--bg-card-hover);
         }
         .notif-full-item.unread {
-          background: rgba(16, 185, 129, 0.04);
+          background: var(--glass-highlight);
           border-left: 4px solid var(--primary);
         }
         .notif-full-icon {

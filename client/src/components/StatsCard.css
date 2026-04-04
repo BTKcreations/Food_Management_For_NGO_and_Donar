@@ -15,11 +15,12 @@
 }
 
 .stats-card.clickable-stats:hover {
-  transform: translateY(-8px) scale(1.02);
-  border-color: rgba(255, 255, 255, 0.15) !important;
+  transform: translateY(-2px) scale(1.01);
+  border-color: var(--primary-light) !important;
+  background: var(--bg-card-hover);
   box-shadow: 
-    0 30px 60px -15px rgba(0, 0, 0, 0.4),
-    0 0 20px rgba(var(--primary-rgb), 0.1);
+    var(--glass-shadow),
+    0 0 20px var(--primary-glow);
 }
 
 .stats-card.clickable-stats:active {

@@ -13,11 +13,12 @@
 }
 
 .donation-card.clickable-card:hover {
-  transform: translateY(-10px) scale(1.02);
-  border-color: rgba(16, 185, 129, 0.4) !important;
+  transform: translateY(-2px) scale(1.01);
+  border-color: var(--primary-light) !important;
+  background: var(--bg-card-hover);
   box-shadow: 
-    0 40px 80px -20px rgba(0, 0, 0, 0.5),
-    0 0 30px rgba(16, 185, 129, 0.1);
+    var(--glass-shadow),
+    0 0 30px var(--primary-glow);
 }
 
 .donation-card.clickable-card:active {

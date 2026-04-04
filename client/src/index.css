@@ -90,6 +90,7 @@
   --bg-tertiary: #F1F5F9;
   --bg-card: rgba(255, 255, 255, 0.9);
   --bg-card-hover: rgba(241, 245, 249, 1);
+  --bg-glass-hover: rgba(255, 255, 255, 0.95);
   
   --text-primary: #0F172A;
   --text-secondary: #475569;
@@ -101,6 +102,7 @@
   --glass-bg: rgba(255, 255, 255, 0.85);
   --glass-border: rgba(203, 213, 225, 0.7);
   --glass-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --glass-highlight: rgba(16, 185, 129, 0.03);
 }
 
 body {
@@ -299,11 +301,11 @@ ul, ol {
 }
 
 .glass-card:hover {
-  border-color: rgba(16, 185, 129, 0.4);
-  background: rgba(17, 24, 39, 0.5);
-  transform: translateY(-6px) scale(1.01);
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), 
-              0 0 20px rgba(16, 185, 129, 0.1);
+  border-color: var(--primary-light);
+  background: var(--bg-card-hover);
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15), 
+              0 0 20px var(--primary-glow);
 }
 
 /* ========== BUTTONS ========== */

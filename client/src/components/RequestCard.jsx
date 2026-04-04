@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import './RequestCard.css';
 
-export default function RequestCard({ request, onCancel }) {
+export default function RequestCard({ request, onCancel, onFulfill }) {
   const navigate = useNavigate();
 
   const handleCardClick = (e) => {
