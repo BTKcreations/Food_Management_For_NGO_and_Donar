@@ -66,6 +66,33 @@ export default function AdminUsers() {
 
       {message && <div className="alert alert-success">{message}</div>}
 
+      <div className="dash-stats-grid" style={{ marginBottom: '2rem' }}>
+        <StatsCard 
+          icon="🏛️" 
+          label="Verified NGOs" 
+          value={users.filter(u => u.role === 'ngo' && u.isVerified).length} 
+          color="info" 
+        />
+        <StatsCard 
+          icon="🏪" 
+          label="Active Donors" 
+          value={users.filter(u => u.role === 'donor' && u.isActive).length} 
+          color="primary" 
+        />
+        <StatsCard 
+          icon="🤝" 
+          label="Volunteers" 
+          value={users.filter(u => u.role === 'volunteer').length} 
+          color="warning" 
+        />
+        <StatsCard 
+          icon="⏳" 
+          label="Pending Verification" 
+          value={users.filter(u => !u.isVerified && (u.role === 'ngo' || u.role === 'donor')).length} 
+          color="danger" 
+        />
+      </div>
+
       <div className="glass-card" style={{ padding: '1rem 1.5rem', marginBottom: '1.5rem', display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
         <input 
           type="text" 

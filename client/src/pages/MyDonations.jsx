@@ -129,18 +129,52 @@ export default function MyDonations() {
                     </p>
                   </div>
               
-              {donation.claimedBy && (
-                <div style={{ marginBottom: '1.25rem', padding: '0.75rem', background: 'rgba(59, 130, 246, 0.05)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
-                  <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>NGO Contact</p>
-                  <p style={{ fontSize: '0.8125rem', fontWeight: 600 }}>{donation.claimedBy.name}</p>
-                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>📞 {donation.claimedBy.phone || donation.claimedBy.organization}</p>
-                </div>
-              )}
-
-              {showPIN && (
-                <div style={{ marginBottom: '1.25rem', padding: '1rem', background: 'var(--bg-tertiary)', borderRadius: 'var(--radius-md)', border: '2px dashed var(--primary)', textAlign: 'center' }}>
-                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '4px' }}>🔑 Pickup Verification Code</p>
-                  <p style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '4px', color: 'var(--primary)' }}>{donation.pickupCode}</p>
+              {/* 🚚 Multi-NGO Pickup Queue */}
+              {donation.pickups && donation.pickups.length > 0 && (
+                <div style={{ marginBottom: '1.25rem' }}>
+                  <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600, marginBottom: '0.75rem' }}>
+                    🚚 Upcoming Pickups ({donation.pickups.filter(p => p.status !== 'completed').length})
+                  </p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {donation.pickups.map(pickup => (
+                      <div 
+                        key={pickup.transactionId} 
+                        className={`pickup-item-card ${pickup.status}`}
+                        style={{ 
+                          padding: '0.75rem', 
+                          background: 'rgba(255,255,255,0.03)', 
+                          borderRadius: 'var(--radius-sm)', 
+                          border: '1px solid var(--border-light)',
+                          borderLeft: `4px solid ${
+                            pickup.status === 'in_transit' ? 'var(--warning)' : 
+                            pickup.status === 'completed' ? 'var(--success)' : 'var(--primary)'
+                          }`
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                          <div>
+                            <p style={{ fontSize: '0.875rem', fontWeight: 600, margin: 0 }}>{pickup.ngoName}</p>
+                            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>📞 {pickup.ngoPhone}</p>
+                          </div>
+                          <span className={`badge badge-sm badge-${pickup.status === 'in_transit' ? 'warning' : pickup.status === 'completed' ? 'success' : 'info'}`} style={{ fontSize: '0.65rem' }}>
+                            {pickup.status.replace('_', ' ')}
+                          </span>
+                        </div>
+                        
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-tertiary)', padding: '6px 10px', borderRadius: '4px' }}>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 500 }}>📦 {pickup.quantity} servings</span>
+                          {pickup.status !== 'completed' && (
+                            <div style={{ textAlign: 'right' }}>
+                              <span style={{ fontSize: '0.65rem', display: 'block', color: 'var(--text-muted)' }}>PICKUP PIN</span>
+                              <span style={{ fontSize: '1.125rem', fontWeight: 800, fontFamily: 'monospace', letterSpacing: '2px', color: 'var(--primary)' }}>
+                                {pickup.pickupCode}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 

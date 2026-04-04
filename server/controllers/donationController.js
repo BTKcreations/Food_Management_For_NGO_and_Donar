@@ -206,27 +206,38 @@ exports.getDonation = async (req, res) => {
 exports.getMyDonations = async (req, res) => {
   try {
     const donations = await Donation.find({ donor: req.user._id })
-      .populate('claimedBy', 'name email phone organization')
       .sort({ createdAt: -1 });
 
-    // Fetch active transactions for these donations to get pickup codes
+    // Fetch all active transactions for these donations to get all pickup codes and participants
+    const donationIds = donations.map(d => d._id);
     const transactions = await Transaction.find({ 
-      donor: req.user._id, 
-      status: { $in: ['accepted', 'in_transit'] } 
-    }).select('donation pickupCode');
+      donation: { $in: donationIds }, 
+      status: { $in: ['accepted', 'in_transit', 'completed'] } 
+    }).populate('ngo', 'name phone organization');
 
-    const donationsWithCodes = donations.map(don => {
-      const trans = transactions.find(t => t.donation.toString() === don._id.toString());
+    const donationsWithPickups = donations.map(don => {
+      // Find all transactions linked to this specific donation
+      const pickups = transactions
+        .filter(t => t.donation.toString() === don._id.toString())
+        .map(t => ({
+          transactionId: t._id,
+          ngoName: t.ngo?.name || 'Local Volunteer',
+          ngoPhone: t.ngo?.phone || 'N/A',
+          quantity: t.allocatedServings,
+          status: t.status,
+          pickupCode: t.pickupCode // This is returned because the requester is the donor
+        }));
+
       return { 
         ...don.toObject(), 
-        pickupCode: trans?.pickupCode 
+        pickups 
       };
     });
 
     res.status(200).json({
       success: true,
       count: donations.length,
-      donations: donationsWithCodes
+      donations: donationsWithPickups
     });
   } catch (error) {
     res.status(500).json({
