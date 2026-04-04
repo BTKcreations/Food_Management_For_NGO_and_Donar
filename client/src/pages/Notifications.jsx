@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
+import { getImageUrl } from '../utils/imageHelper';
 import './Dashboard.css';
 
 export default function Notifications() {
@@ -116,7 +117,7 @@ export default function Notifications() {
                       {n.images.map((img, i) => (
                         <img 
                           key={i} 
-                          src={img.startsWith('http') ? img : `${import.meta.env.VITE_IMAGE_BASE_URL || 'http://localhost:5000'}${img}`} 
+                          src={getImageUrl(img)} 
                           alt="Proof" 
                           style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--border-light)' }} 
                         />

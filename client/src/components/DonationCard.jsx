@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { getImageUrl } from '../utils/imageHelper';
 import './DonationCard.css';
 
 export default function DonationCard({ donation, onClaim, showActions = true }) {
@@ -49,25 +50,40 @@ export default function DonationCard({ donation, onClaim, showActions = true }) 
     return diff > 0 && diff < 3 * 60 * 60 * 1000; // less than 3 hours
   };
 
+  const imageUrl = getImageUrl(donation.images?.[0] || donation.items?.[0]?.image);
+
   return (
     <div 
-      className={`donation-card glass-card ${isExpiringSoon() ? 'expiring-soon' : ''} clickable-card`}
+      className={`donation-card glass-card ${isExpiringSoon() ? 'expiring-soon' : ''} ${!imageUrl ? 'no-image' : ''} clickable-card`}
       onClick={handleCardClick}
     >
-      <div className="donation-card-header">
-        <div className="food-type-badge">
-          <span className="food-icon">{foodTypeIcons[donation.foodType] || '🍽️'}</span>
-          <span>{donation.foodType?.replace('_', ' ')}</span>
-        </div>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          {donation.donor?.isVerifiedOrg && (
-            <span className="verified-badge" title="Verified Organization">✅</span>
-          )}
-          <span className={`badge status-${donation.status}`}>
-            {donation.status?.replace('_', ' ')}
-          </span>
+      <div className="donation-card-media">
+        {imageUrl ? (
+          <img src={imageUrl} alt={donation.foodName} className="donation-card-image" />
+        ) : (
+          <div className="donation-card-placeholder">
+            <span className="placeholder-icon">{foodTypeIcons[donation.foodType] || '🍽️'}</span>
+          </div>
+        )}
+        <div className="donation-card-overlay">
+          <div className="food-type-badge">
+            <span className="food-icon">{foodTypeIcons[donation.foodType] || '🍽️'}</span>
+            <span>{donation.foodType?.replace('_', ' ')}</span>
+          </div>
         </div>
       </div>
+
+      <div className="donation-card-content">
+        <div className="donation-card-header">
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginLeft: 'auto' }}>
+            {donation.donor?.isVerifiedOrg && (
+              <span className="verified-badge" title="Verified Organization">✅</span>
+            )}
+            <span className={`badge status-${donation.status}`}>
+              {donation.status?.replace('_', ' ')}
+            </span>
+          </div>
+        </div>
 
       <div className="donation-card-info-row">
         <h3 className="donation-food-name">{donation.foodName}</h3>
@@ -163,5 +179,6 @@ export default function DonationCard({ donation, onClaim, showActions = true }) 
         </div>
       )}
     </div>
-  );
+  </div>
+);
 }

@@ -1,10 +1,10 @@
 .donation-card {
-  padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  overflow: hidden;
   animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 0 !important; /* Resetting padding, moved to content */
 }
 
 .donation-card.clickable-card {
@@ -36,16 +36,57 @@
   100% { transform: scale(1); opacity: 1; }
 }
 
-.verified-badge {
-  color: var(--primary);
-  filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.3));
-  cursor: help;
+/* 📸 Card Media Section */
+.donation-card-media {
+  position: relative;
+  height: 180px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.donation-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.donation-card:hover .donation-card-image {
+  transform: scale(1.1);
+}
+
+.donation-card-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  opacity: 0.5;
+}
+
+.donation-card-overlay {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.donation-card-content {
+  padding: 1.25rem 1.5rem 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .donation-card-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
 }
 
 .food-type-badge {

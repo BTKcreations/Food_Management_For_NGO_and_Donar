@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import DonationCard from '../components/DonationCard';
+import { getImageUrl } from '../utils/imageHelper';
 import './Dashboard.css';
 
 export default function MyDonations() {
@@ -69,12 +70,27 @@ export default function MyDonations() {
         </div>
       ) : (
         <div className="donations-grid">
-          {donations.map(donation => (
-            <div key={donation._id} className="glass-card" style={{ padding: '1.25rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                <h3 style={{ fontSize: '1.125rem', fontWeight: 700 }}>{donation.foodName}</h3>
-                <span className={`badge status-${donation.status}`}>{donation.status?.replace('_', ' ')}</span>
-              </div>
+          {donations.map(donation => {
+            const imageUrl = getImageUrl(donation.images?.[0] || donation.items?.[0]?.image);
+            return (
+              <div key={donation._id} className="glass-card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ height: '140px', width: '100%', position: 'relative', overflow: 'hidden' }}>
+                  {imageUrl ? (
+                    <img src={imageUrl} alt={donation.foodName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <div style={{ width: '100%', height: '100%', background: 'var(--bg-tertiary)', display: 'flex', alignItems: 'center', justify: 'center', fontSize: '2rem', opacity: 0.5 }}>
+                      🍽️
+                    </div>
+                  )}
+                  <div style={{ position: 'absolute', top: '10px', left: '10px' }}>
+                    <span className={`badge status-${donation.status}`}>{donation.status?.replace('_', ' ')}</span>
+                  </div>
+                </div>
+
+                <div style={{ padding: '1.25rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                    <h3 style={{ fontSize: '1.125rem', fontWeight: 700 }}>{donation.foodName}</h3>
+                  </div>
               
               <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
                 {donation.servings > 0 ? `${donation.servings} servings • ` : ''}
@@ -114,8 +130,10 @@ export default function MyDonations() {
                   </>
                 )}
               </div>
-            </div>
-          ))}
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

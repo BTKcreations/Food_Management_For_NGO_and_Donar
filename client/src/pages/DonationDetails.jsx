@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
+import { getImageUrl } from '../utils/imageHelper';
 import MapPicker from '../components/MapPicker';
 import MapboxTracker from '../components/MapboxTracker';
 import './Dashboard.css';
@@ -244,7 +245,7 @@ export default function DonationDetails() {
               {donation.items.map((item, i) => (
                 <div key={i} className="glass-card" style={{ padding: '0.625rem', border: '1px solid var(--border-light)' }}>
                   <img 
-                    src={item.image.startsWith('http') ? item.image : `${import.meta.env.VITE_IMAGE_BASE_URL || 'http://localhost:5000'}${item.image}`} 
+                    src={getImageUrl(item.image)} 
                     alt={item.name} 
                     style={{ width: '100%', height: '110px', objectFit: 'cover', borderRadius: 'var(--radius-sm)' }} 
                   />
@@ -280,7 +281,7 @@ export default function DonationDetails() {
               {donation.images.map((img, i) => (
                 <img 
                   key={i} 
-                  src={img.startsWith('http') ? img : `${import.meta.env.VITE_IMAGE_BASE_URL || 'http://localhost:5000'}${img}`} 
+                  src={getImageUrl(img)} 
                   alt="Food" 
                   style={{ width: '100%', height: '100px', objectFit: 'cover', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-light)' }} 
                 />
@@ -483,7 +484,7 @@ export default function DonationDetails() {
                   {transaction.deliveryImages.map((img, i) => (
                     <img 
                       key={i} 
-                      src={img.startsWith('http') ? img : `${import.meta.env.VITE_IMAGE_BASE_URL || 'http://localhost:5000'}${img}`} 
+                      src={getImageUrl(img)} 
                       alt="Distribution" 
                       style={{ width: '100%', height: '100px', objectFit: 'cover', borderRadius: 'var(--radius-sm)', border: '1px solid var(--primary-light)' }} 
                     />
