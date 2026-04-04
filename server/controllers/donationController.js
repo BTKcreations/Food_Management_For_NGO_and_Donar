@@ -209,10 +209,24 @@ exports.getMyDonations = async (req, res) => {
       .populate('claimedBy', 'name email phone organization')
       .sort({ createdAt: -1 });
 
+    // Fetch active transactions for these donations to get pickup codes
+    const transactions = await Transaction.find({ 
+      donor: req.user._id, 
+      status: { $in: ['accepted', 'in_transit'] } 
+    }).select('donation pickupCode');
+
+    const donationsWithCodes = donations.map(don => {
+      const trans = transactions.find(t => t.donation.toString() === don._id.toString());
+      return { 
+        ...don.toObject(), 
+        pickupCode: trans?.pickupCode 
+      };
+    });
+
     res.status(200).json({
       success: true,
       count: donations.length,
-      donations
+      donations: donationsWithCodes
     });
   } catch (error) {
     res.status(500).json({

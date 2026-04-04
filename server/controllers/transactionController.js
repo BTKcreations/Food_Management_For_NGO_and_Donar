@@ -126,7 +126,6 @@ exports.getTransactions = async (req, res) => {
       } else if (role === 'receiver') {
         filter.receiver = req.user._id;
       } else {
-        // Base visibility: user is donor, receiver, or ngo
         filter.$or = [
           { donor: req.user._id },
           { receiver: req.user._id },
@@ -142,7 +141,8 @@ exports.getTransactions = async (req, res) => {
     }
 
     const transactions = await Transaction.find(filter)
-      .populate('donation', 'foodName foodType source quantity servings status images address')
+      .select('+pickupCode +deliveryCode')
+      .populate('donation', 'foodName foodType source quantity servings status images address location')
       .populate('donor', 'name email phone organization')
       .populate('receiver', 'name email phone organization')
       .populate('ngo', 'name email phone')
@@ -152,11 +152,24 @@ exports.getTransactions = async (req, res) => {
 
     const total = await Transaction.countDocuments(filter);
 
+    // Securely map codes
+    const secureTransactions = transactions.map(t => {
+      const obj = t.toObject();
+      const isDonor = t.donor?._id.toString() === req.user._id.toString();
+      const isReceiver = t.receiver?._id.toString() === req.user._id.toString();
+      const isAdmin = req.user.role === 'admin';
+
+      if (!isDonor && !isAdmin) delete obj.pickupCode;
+      if (!isReceiver && !isAdmin) delete obj.deliveryCode;
+      
+      return obj;
+    });
+
     res.status(200).json({
       success: true,
-      count: transactions.length,
+      count: secureTransactions.length,
       total,
-      transactions
+      transactions: secureTransactions
     });
   } catch (error) {
     res.status(500).json({
@@ -264,13 +277,13 @@ exports.updateTransactionStatus = async (req, res) => {
 
     if (status === 'in_transit') {
       transaction.pickupTime = new Date();
-      if (transaction.donation) {
+      if (transaction.donation && transaction.donation.remainingServings === 0) {
         transaction.donation.status = 'picked_up';
         await transaction.donation.save();
       }
     } else if (status === 'completed') {
       transaction.deliveryTime = new Date();
-      if (transaction.donation) {
+      if (transaction.donation && transaction.donation.remainingServings === 0) {
         transaction.donation.status = 'delivered';
         await transaction.donation.save();
       }

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import DonationCard from '../components/DonationCard';
@@ -7,6 +8,7 @@ import './Dashboard.css';
 
 export default function MyDonations() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [donations, setDonations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
@@ -49,6 +51,32 @@ export default function MyDonations() {
     }
   };
 
+  const handlePostAgain = (donation) => {
+    // Navigate to create donation with pre-fill data (omitting IDs and times)
+    const prefill = {
+      foodName: donation.foodName,
+      foodType: donation.foodType,
+      description: donation.description,
+      quantity: donation.quantity,
+      servings: donation.servings,
+      address: donation.address,
+      contactPhone: donation.contactPhone,
+      isVegetarian: donation.isVegetarian,
+      latitude: donation.location?.coordinates[1],
+      longitude: donation.location?.coordinates[0],
+      specialInstructions: donation.specialInstructions,
+      source: donation.source,
+      urgency: donation.urgency,
+      // Carry over item names/servings but not the files or times
+      items: (donation.items || []).map(i => ({
+        name: i.name,
+        quantityOrWeight: i.quantityOrWeight,
+        servings: i.servings
+      }))
+    };
+    navigate('/donations/create', { state: { prefill } });
+  };
+
   if (loading) {
     return <div className="dashboard-page"><div className="loading-container"><div className="spinner"></div></div></div>;
   }
@@ -57,7 +85,7 @@ export default function MyDonations() {
     <div className="dashboard-page">
       <div className="page-header animate-fade-in">
         <h1 className="page-title">🍽️ My Donations</h1>
-        <p className="page-subtitle">Manage your food donations</p>
+        <p className="page-subtitle">Manage your food donations and track your impact</p>
       </div>
 
       {message && <div className="alert alert-success">{message}</div>}
@@ -72,63 +100,65 @@ export default function MyDonations() {
         <div className="donations-grid">
           {donations.map(donation => {
             const imageUrl = getImageUrl(donation.images?.[0] || donation.items?.[0]?.image);
+            const canCancel = donation.status === 'available';
+            const showPIN = donation.pickupCode && (donation.status === 'claimed' || donation.status === 'picked_up');
+
             return (
-              <div key={donation._id} className="glass-card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                <div style={{ height: '140px', width: '100%', position: 'relative', overflow: 'hidden' }}>
+              <div key={donation._id} className="glass-card animate-fade-in-up" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ height: '160px', width: '100%', position: 'relative', overflow: 'hidden' }}>
                   {imageUrl ? (
                     <img src={imageUrl} alt={donation.foodName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   ) : (
-                    <div style={{ width: '100%', height: '100%', background: 'var(--bg-tertiary)', display: 'flex', alignItems: 'center', justify: 'center', fontSize: '2rem', opacity: 0.5 }}>
+                    <div style={{ width: '100%', height: '100%', background: 'var(--bg-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', opacity: 0.5 }}>
                       🍽️
                     </div>
                   )}
-                  <div style={{ position: 'absolute', top: '10px', left: '10px' }}>
+                  <div style={{ position: 'absolute', top: '12px', left: '12px' }}>
                     <span className={`badge status-${donation.status}`}>{donation.status?.replace('_', ' ')}</span>
                   </div>
                 </div>
 
-                <div style={{ padding: '1.25rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                    <h3 style={{ fontSize: '1.125rem', fontWeight: 700 }}>{donation.foodName}</h3>
+                <div style={{ padding: '1.25rem', flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ marginBottom: '0.75rem' }}>
+                    <h3 style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: '4px' }}>{donation.foodName}</h3>
+                    <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
+                      {donation.remainingServings !== undefined && donation.remainingServings < donation.servings 
+                        ? `${donation.remainingServings} Servings left` 
+                        : `${donation.servings || 0} Servings total`}
+                      {donation.foodType && ` • ${donation.foodType.replace('_', ' ')}`}
+                    </p>
                   </div>
               
-              <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
-                {donation.servings > 0 ? `${donation.servings} servings • ` : ''}
-                {donation.quantity ? `${donation.quantity} • ` : ''}
-                {donation.foodType?.replace('_', ' ')}
-              </p>
-              
-              <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
-                📍 {donation.address}
-              </p>
-
               {donation.claimedBy && (
-                <div style={{ marginTop: '0.75rem', padding: '0.5rem', background: 'rgba(59, 130, 246, 0.1)', borderRadius: 'var(--radius-sm)', fontSize: '0.8125rem' }}>
-                  Claimed by: <strong>{donation.claimedBy.name}</strong> ({donation.claimedBy.organization || donation.claimedBy.email})
+                <div style={{ marginBottom: '1.25rem', padding: '0.75rem', background: 'rgba(59, 130, 246, 0.05)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
+                  <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>NGO Contact</p>
+                  <p style={{ fontSize: '0.8125rem', fontWeight: 600 }}>{donation.claimedBy.name}</p>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>📞 {donation.claimedBy.phone || donation.claimedBy.organization}</p>
                 </div>
               )}
 
-              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', flexWrap: 'wrap' }}>
-                {donation.status === 'claimed' && (
-                  <button className="btn btn-primary btn-sm" onClick={() => handleStatusUpdate(donation._id, 'picked_up')}>
-                    Mark Picked Up
+              {showPIN && (
+                <div style={{ marginBottom: '1.25rem', padding: '1rem', background: 'var(--bg-tertiary)', borderRadius: 'var(--radius-md)', border: '2px dashed var(--primary)', textAlign: 'center' }}>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '4px' }}>🔑 Pickup Verification Code</p>
+                  <p style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '4px', color: 'var(--primary)' }}>{donation.pickupCode}</p>
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto', flexWrap: 'wrap' }}>
+                <button className="btn btn-ghost btn-sm" onClick={() => navigate(`/donations/${donation._id}`)}>
+                  Details
+                </button>
+                <button className="btn btn-secondary btn-sm" onClick={() => handlePostAgain(donation)}>
+                  🔄 Post Again
+                </button>
+                {canCancel && (
+                  <button className="btn btn-warning btn-sm" onClick={() => handleStatusUpdate(donation._id, 'cancelled')}>
+                    Cancel
                   </button>
                 )}
-                {donation.status === 'picked_up' && (
-                  <button className="btn btn-primary btn-sm" onClick={() => handleStatusUpdate(donation._id, 'delivered')}>
-                    Mark Delivered
-                  </button>
-                )}
-                {donation.status === 'available' && (
-                  <>
-                    <button className="btn btn-warning btn-sm" onClick={() => handleStatusUpdate(donation._id, 'cancelled')}>
-                      Cancel
-                    </button>
-                    <button className="btn btn-danger btn-sm" onClick={() => handleDelete(donation._id)}>
-                      Delete
-                    </button>
-                  </>
-                )}
+                <button className="btn btn-danger btn-sm" onClick={() => handleDelete(donation._id)}>
+                  Delete
+                </button>
               </div>
                 </div>
               </div>

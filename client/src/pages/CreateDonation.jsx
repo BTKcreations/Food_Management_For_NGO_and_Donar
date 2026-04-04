@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import MapPicker from '../components/MapPicker';
@@ -27,6 +27,26 @@ export default function CreateDonation() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state?.prefill) {
+      const { items, ...rest } = location.state.prefill;
+      setFormData(prev => ({ ...prev, ...rest }));
+      
+      // We don't have files, so we populate the basket with placeholders
+      // Users must add photos for the items they want to duplicate
+      if (items && items.length > 0) {
+        // Option 1: Populate basket but mark as 'needs_image'
+        // Option 2: Just populate the form with general details
+        // Let's go with Option 1 but users will have to 'Re-upload' images
+        // Actually, the current CreateDonation logic requires files for each basket item.
+        // So let's just pre-fill the main form and provide a hint.
+        setSuccess('Form pre-filled from your previous donation! Please add fresh photos for your food items.');
+        setTimeout(() => setSuccess(''), 5000);
+      }
+    }
+  }, [location.state]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
