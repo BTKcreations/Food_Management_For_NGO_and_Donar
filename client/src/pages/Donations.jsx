@@ -34,8 +34,22 @@ export default function Donations() {
 
   const handleClaim = async (donationId) => {
     try {
-      await api.put(`/donations/${donationId}/claim`);
-      setMessage('Food claimed successfully! Contact the donor for pickup.');
+      const donation = donations.find(d => d._id === donationId);
+      let claimQuantity = donation?.remainingServings || 1;
+      
+      if (claimQuantity > 1) {
+        const input = window.prompt(`How many servings would you like to claim? (Available: ${claimQuantity})`, claimQuantity);
+        if (input === null) return; // Cancelled
+        const num = parseInt(input);
+        if (isNaN(num) || num <= 0 || num > claimQuantity) {
+          alert(`Please enter a valid number between 1 and ${claimQuantity}`);
+          return;
+        }
+        claimQuantity = num;
+      }
+
+      await api.put(`/donations/${donationId}/claim`, { claimQuantity });
+      setMessage(`${claimQuantity} servings claimed successfully! Contact the donor for pickup.`);
       fetchDonations();
       setTimeout(() => setMessage(''), 3000);
     } catch (err) {

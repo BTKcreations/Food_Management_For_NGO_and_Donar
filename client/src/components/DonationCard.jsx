@@ -120,7 +120,11 @@ export default function DonationCard({ donation, onClaim, showActions = true }) 
           {donation.servings > 0 && (
             <div className="meta-item">
               <span className="meta-icon">🍽️</span>
-              <span className="meta-text">{donation.servings} Servings</span>
+              <span className="meta-text">
+                {donation.remainingServings !== undefined && donation.remainingServings < donation.servings 
+                  ? `${donation.remainingServings} left / ${donation.servings}` 
+                  : `${donation.servings} Servings`}
+              </span>
             </div>
           )}
           <div className="meta-item">

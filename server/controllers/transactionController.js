@@ -303,7 +303,8 @@ exports.updateTransactionStatus = async (req, res) => {
             quantity: item.servings > 0 ? item.servings : parseInt(item.quantityOrWeight) || 1,
             unit: item.servings > 0 ? 'servings' : 'units',
             expiryDate: item.expiresAt || donation.expiresAt,
-            sourceDonation: donation._id
+            sourceDonation: donation._id,
+            qualityImages: transaction.deliveryImages || []
           }));
           await Inventory.insertMany(inventoryItems);
         } else {
@@ -313,7 +314,8 @@ exports.updateTransactionStatus = async (req, res) => {
             foodType: donation.foodType,
             quantity: transaction.allocatedServings || donation.quantity,
             expiryDate: donation.expiresAt,
-            sourceDonation: donation._id
+            sourceDonation: donation._id,
+            qualityImages: transaction.deliveryImages || []
           });
         }
       } else {

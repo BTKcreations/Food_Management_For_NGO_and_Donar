@@ -36,7 +36,10 @@ const inventorySchema = new mongoose.Schema({
   sourceDonation: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Donation'
-  }
+  },
+  qualityImages: [{
+    type: String
+  }]
 }, {
   timestamps: true
 });

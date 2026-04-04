@@ -138,6 +138,13 @@ exports.getDonations = async (req, res) => {
       };
     }
 
+    // PROACTIVE EXPIRY CLEANUP (Lazy Cron)
+    const now = new Date();
+    await Donation.updateMany(
+      { status: 'available', expiresAt: { $lt: now } },
+      { $set: { status: 'expired' } }
+    );
+
     const donations = await Donation.find(filter)
       .populate('donor', 'name email phone organization profileImage')
       .populate('claimedBy', 'name email phone organization')
@@ -220,7 +227,7 @@ exports.getMyDonations = async (req, res) => {
 // @route   PUT /api/donations/:id/claim
 exports.claimDonation = async (req, res) => {
   try {
-    const { claimQuantity, destinationType, receiverId, notes } = req.body || {};
+    const { claimQuantity: requestedQty, destinationType, receiverId, notes } = req.body || {};
     const donation = await Donation.findById(req.params.id);
 
     if (!donation) {
@@ -231,15 +238,21 @@ exports.claimDonation = async (req, res) => {
       return res.status(400).json({ success: false, message: `Donation is ${donation.status}` });
     }
 
-    // Hub & Spoke Option A Requirement: All claims are Bulk Claims.
-    const isBatch = true;
-    const amountToClaim = donation.remainingServings || 1;
-
-    // Determine destination (Always NGO Warehouse for Inbound Leg)
+    // Partial Claiming Logic
+    const claimQuantity = parseInt(requestedQty) || donation.remainingServings || 1;
     const finalReceiverId = req.user._id;
+    
+    if (claimQuantity > donation.remainingServings) {
+      return res.status(400).json({ success: false, message: `Only ${donation.remainingServings} servings available` });
+    }
 
-    // Update donation quantity
-    donation.status = 'fully_claimed';
+    donation.remainingServings -= claimQuantity;
+    
+    if (donation.remainingServings <= 0) {
+      donation.status = 'fully_claimed';
+    } else {
+      donation.status = 'partially_claimed';
+    }
     
     donation.claimedBy = req.user._id;
     donation.claimedAt = new Date();
@@ -251,7 +264,7 @@ exports.claimDonation = async (req, res) => {
       sender: req.user._id,
       type: 'donation_claimed',
       title: '✅ Your donation is being redistributed!',
-      message: `${req.user.name} has claimed ${amountToClaim} servings of ${donation.foodName} for ${destinationType === 'warehouse' ? 'their warehouse' : 'a recipient'}.`,
+      message: `${req.user.name} has claimed ${claimQuantity} servings of ${donation.foodName} for ${destinationType === 'warehouse' ? 'their warehouse' : 'a recipient'}.`,
       relatedDonation: donation._id
     });
 
@@ -264,10 +277,10 @@ exports.claimDonation = async (req, res) => {
       donor: donation.donor,
       receiver: finalReceiverId,
       destinationType: destinationType || 'receiver',
-      allocatedServings: amountToClaim,
+      allocatedServings: claimQuantity,
       status: 'accepted',
       pickupLocation: donation.location,
-      notes: notes || `Redistribution of ${amountToClaim} servings`,
+      notes: notes || `Redistribution of ${claimQuantity} servings`,
       pickupCode,
       deliveryCode,
       ngo: req.user._id
@@ -275,7 +288,7 @@ exports.claimDonation = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: `${amountToClaim} servings claimed successfully`,
+      message: `${claimQuantity} servings claimed successfully`,
       donation,
       transaction
     });
