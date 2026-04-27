@@ -17,14 +17,23 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, 'Password is required'],
+    required: false,
     minlength: 6,
     select: false
   },
+  firebaseUid: {
+    type: String,
+    unique: true,
+    sparse: true
+  },
+  avatar: {
+    type: String,
+    default: ''
+  },
   phone: {
     type: String,
-    required: [true, 'Phone number is required'],
-    match: [/^[0-9]{10,12}$/, 'Please provide a valid 10 to 12 digit phone number']
+    required: false,
+    match: [/^[0-9]{10,15}$/, 'Please provide a valid phone number']
   },
   role: {
     type: String,

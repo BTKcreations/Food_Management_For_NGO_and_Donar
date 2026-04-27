@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import GoogleLogin from '../components/auth/GoogleLogin';
 import './Auth.css';
 
 export default function Register() {
@@ -10,7 +11,7 @@ export default function Register() {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { register } = useAuth();
+  const { register, loginWithFirebase } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -165,6 +166,21 @@ export default function Register() {
               )}
             </button>
           </form>
+
+          <div className="auth-divider">
+            <span>OR REGISTER WITH</span>
+          </div>
+
+          <div className="social-auth">
+            <GoogleLogin 
+              role={formData.role}
+              onLoginSuccess={(data) => {
+                loginWithFirebase(data);
+                navigate('/dashboard');
+              }}
+              onLoginError={(msg) => setError(msg)}
+            />
+          </div>
 
           <div className="auth-footer">
             <p>Already have an account? <Link to="/login" className="auth-link">Sign In</Link></p>

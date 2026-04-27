@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import GoogleLogin from '../components/auth/GoogleLogin';
 import './Auth.css';
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, loginWithFirebase } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -86,6 +87,20 @@ export default function Login() {
               )}
             </button>
           </form>
+
+          <div className="auth-divider">
+            <span>OR</span>
+          </div>
+
+          <div className="social-auth">
+            <GoogleLogin 
+              onLoginSuccess={(data) => {
+                loginWithFirebase(data);
+                navigate('/dashboard');
+              }}
+              onLoginError={(msg) => setError(msg)}
+            />
+          </div>
 
           <div className="auth-footer">
             <p>Don't have an account? <Link to="/register" className="auth-link">Create Account</Link></p>

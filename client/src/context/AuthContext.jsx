@@ -31,6 +31,17 @@ export function AuthProvider({ children }) {
     return userData;
   };
 
+  const loginWithFirebase = (data) => {
+    const { token: newToken, user: userData } = data;
+    
+    localStorage.setItem('foodbridge_token', newToken);
+    localStorage.setItem('foodbridge_user', JSON.stringify(userData));
+    setToken(newToken);
+    setUser(userData);
+    
+    return userData;
+  };
+
   const register = async (formData) => {
     const res = await api.post('/auth/register', formData);
     const { token: newToken, user: userData } = res.data;
@@ -58,7 +69,7 @@ export function AuthProvider({ children }) {
   return (
     <AuthContext.Provider value={{ 
       user, token, loading, 
-      login, register, logout, updateUser,
+      login, register, logout, updateUser, loginWithFirebase,
       isAuthenticated: !!token 
     }}>
       {children}
