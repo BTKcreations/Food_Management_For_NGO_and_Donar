@@ -5,7 +5,7 @@ SETLOCAL EnableDelayedExpansion
 color 0B
 
 echo ===================================================
-echo   🚚 FOODBRIDGE - NGO & DONOR MANAGEMENT SYSTEM
+echo   🚚 FOODBRIDGE - NGO ^& DONOR MANAGEMENT SYSTEM
 echo ===================================================
 echo.
 echo [1/2] Launching Backend Server...
